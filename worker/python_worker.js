@@ -33,19 +33,24 @@ function invoke(tool, pos, callback) {
         ],
         useStdin: true
     }, function onResult(err, stdout, stderr) {
-        if (err) {
-            console.warn("Warning: could not invoke python-jedi: ", err.message, stderr);
-            return callback();
-        }
+        if (err) return done(err);
+        
         var result;
         try {
             result = JSON.parse(result);
         }
-        catch (e) {
-            return onResult(err);
+        catch (err) {
+            return done(err);
         }
+        done(result);
         
-        callback(result);
+        function done(err, result) {
+            if (err) {
+                console.warn("Warning: could not invoke python-jedi: ", err.message, stderr);
+                return callback();
+            }
+            callback(result);
+        }
     });
 }
 
