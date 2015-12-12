@@ -4,7 +4,7 @@
  * @copyright 2015, Ajax.org B.V.
  */
 define(function(require, exports, module) {
-    main.consumes = ["language", "jsonalyzer"];
+    main.consumes = ["Plugin", "language", "jsonalyzer"];
     main.provides = ["language.python"];
     return main;
 
@@ -17,7 +17,7 @@ define(function(require, exports, module) {
         plugin.on("load", function() {
             language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_worker");
             jsonalyzer.registerWorkerHandler("plugins/c9.ide.language.python/worker/python_jsonalyzer_worker");
-            jsonalyzer.registerServerHandler("plugins/c9.ide.language.python/worker/python_jsonalyzer_server_worker");
+            jsonalyzer.registerServerHandler("plugins/c9.ide.language.python/server/python_jsonalyzer_server_worker");
         });
         
         /** @ignore */

@@ -2,13 +2,17 @@ define(function(require, exports, module) {
 
 var baseHandler = require("plugins/c9.ide.language/base_handler");
 var workerUtil = require("plugins/c9.ide.language/worker_util");
-var jediComplete = require("text!./jedi_complete.py");
-var jediJumpToDef = require("text!./jedi_jumptodef.py");
+var jediComplete = require("./jedi_complete.py.js");
+var jediJumpToDef = require("./jedi_jumptodef.py.js");
 
 var handler = module.exports = Object.create(baseHandler);
 
 handler.handlesLanguage = function(language) {
     return language === "python";
+};
+
+handler.getCompletionRegex = function() {
+    return (/^([\.]|\bimport )$/);
 };
 
 handler.complete = function(doc, fullAst, pos, currentNode, callback) {
@@ -24,8 +28,8 @@ function invoke(tool, pos, callback) {
         args: [
             "-c",
             tool,
-            pos.row,
-            pos.column
+            String(pos.row),
+            String(pos.column),
         ],
         useStdin: true
     }, function onResult(err, stdout, stderr) {

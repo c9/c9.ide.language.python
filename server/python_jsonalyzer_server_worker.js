@@ -50,8 +50,8 @@ handler.analyzeCurrent = function(path, doc, ast, options, callback) {
             return callback(err);
         }
         that.$exec(tempFile, doc, function(err, summary, markers) {
-            fs.unlink(tempFile, function() {
-                if (err) console.error(err);
+            fs.unlink(tempFile, function(err2) {
+                if (err) console.error(err2);
                 callback(err, summary, markers);
             });
         });
@@ -107,7 +107,7 @@ handler.$exec = function(path, doc, callback) {
             callback(null, null, markers);
         }
     );
-}
+};
 
 function getLevel(code) {
     if (code[0] === "E" || code[0] === "F")
