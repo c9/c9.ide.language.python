@@ -30,8 +30,7 @@ function invoke(tool, pos, callback) {
             tool,
             String(pos.row),
             String(pos.column),
-        ],
-        useStdin: true
+        ]
     }, function onResult(err, stdout, stderr) {
         if (err) return done(err);
         
