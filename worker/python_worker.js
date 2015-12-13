@@ -5,7 +5,14 @@ var workerUtil = require("plugins/c9.ide.language/worker_util");
 var jediComplete = require("./jedi_complete.py.js");
 var jediJumpToDef = require("./jedi_jumptodef.py.js");
 
+var KEYWORD_REGEX = new RegExp(
+    "^(and|as|assert|break|class|continue|def|del|elif|else|except|exec|"
+    + "finally|for|from|global|if|import|in|is|lambda|not|or|pass|print|"
+    + "raise|return|try|while|with|yield)$"
+);
+
 var handler = module.exports = Object.create(baseHandler);
+
 
 handler.handlesLanguage = function(language) {
     return language === "python";
@@ -26,9 +33,14 @@ handler.complete = function(doc, fullAst, pos, currentNode, callback) {
     });
 };
 
-// TODO: change all similar signature to this form?
 handler.predictNextCompletion = function(doc, fullAst, pos, options, callback) {
-    return options.predictedIdentifier + ".";
+    var predicted = options.predictedMatches.filter(function(m) {
+        return !m.replaceText.match(KEYWORD_REGEX);
+    });
+    if (predicted.length !== 1)
+        return callback();
+    console.log("Predicted our next completion will be for " + predicted[0].replaceText + ".") // DEBUG
+    callback(null, { predicted: predicted[0].replaceText + "." });
 };
 
 handler.jumpToDefinition = function(doc, fullAst, pos, currentNode, callback) {
