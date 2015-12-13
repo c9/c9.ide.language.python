@@ -40,7 +40,7 @@ function invoke(tool, pos, callback) {
         args: [
             "-c",
             tool,
-            String(pos.row),
+            String(pos.row + 1),
             String(pos.column),
         ]
     }, function onResult(err, stdout, stderr) {
@@ -48,19 +48,19 @@ function invoke(tool, pos, callback) {
         
         var result;
         try {
-            result = JSON.parse(result);
+            result = JSON.parse(stdout);
         }
         catch (err) {
-            return done(err);
+            return done(new Error("Couldn't parse python-jedi output: " + stdout));
         }
-        done(result);
+        done(null, result);
         
         function done(err, result) {
             if (err) {
                 console.warn("Warning: could not invoke python-jedi: ", err.message, stderr);
                 return callback();
             }
-            callback(result);
+            callback(err, result);
         }
     });
 }
