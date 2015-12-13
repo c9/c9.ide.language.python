@@ -23,12 +23,15 @@ handler.getCompletionRegex = function() {
 };
 
 handler.complete = function(doc, fullAst, pos, currentNode, callback) {
+    var start = Date.now();
+    var line = doc.getLine(pos.row);
     invoke(jediComplete, pos, function(err, results) {
         results && results.forEach(function(r) {
             r.isContextual = true;
             r.guessTooltip = true;
             r.priority = 3;
         });
+        console.log("[python_worker] Completed in " + (Date.now() - start) + "ms: " + line);
         callback(err, results);
     });
 };
@@ -39,7 +42,7 @@ handler.predictNextCompletion = function(doc, fullAst, pos, options, callback) {
     });
     if (predicted.length !== 1)
         return callback();
-    console.log("Predicted our next completion will be for " + predicted[0].replaceText + ".") // DEBUG
+    console.log("[python_worker] Predicted our next completion will be for " + predicted[0].replaceText + ".");
     callback(null, { predicted: predicted[0].replaceText + "." });
 };
 
