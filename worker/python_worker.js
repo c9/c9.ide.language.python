@@ -37,7 +37,7 @@ handler.complete = function(doc, fullAst, pos, currentNode, callback) {
 };
 
 handler.predictNextCompletion = function(doc, fullAst, pos, options, callback) {
-    var predicted = options.predictedMatches.filter(function(m) {
+    var predicted = options.matches.filter(function(m) {
         return !m.replaceText.match(KEYWORD_REGEX);
     });
     if (predicted.length !== 1)
