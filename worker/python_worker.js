@@ -16,7 +16,19 @@ handler.getCompletionRegex = function() {
 };
 
 handler.complete = function(doc, fullAst, pos, currentNode, callback) {
-    invoke(jediComplete, pos, callback);
+    invoke(jediComplete, pos, function(err, results) {
+        results && results.forEach(function(r) {
+            r.isContextual = true;
+            r.guessTooltip = true;
+            r.priority = 3;
+        });
+        callback(err, results);
+    });
+};
+
+// TODO: change all similar signature to this form?
+handler.predictNextCompletion = function(doc, fullAst, pos, options, callback) {
+    return options.predictedIdentifier + ".";
 };
 
 handler.jumpToDefinition = function(doc, fullAst, pos, currentNode, callback) {
