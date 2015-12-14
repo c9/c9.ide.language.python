@@ -51,7 +51,7 @@ handler.analyzeCurrent = function(path, doc, ast, options, callback) {
         }
         that.$exec(tempFile, doc, function(err, summary, markers) {
             fs.unlink(tempFile, function(err2) {
-                if (err) console.error(err2);
+                if (err2) console.error(err2);
                 callback(err, summary, markers);
             });
         });
