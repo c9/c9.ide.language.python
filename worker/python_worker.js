@@ -29,7 +29,8 @@ handler.complete = function(doc, fullAst, pos, currentNode, callback) {
         results && results.forEach(function(r) {
             r.isContextual = true;
             r.guessTooltip = true;
-            r.priority = 3;
+            r.priority = r.name[0] === "_" ? 3 : 4;
+            r.icon = r.name[0] === "_" ? r.icon.replace(/2?$/, "2") : r.icon;
         });
         console.log("[python_worker] Completed in " + (Date.now() - start) + "ms: " + line);
         callback(err, results);
