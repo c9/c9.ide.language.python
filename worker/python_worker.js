@@ -73,7 +73,7 @@ function invoke(tool, pos, callback) {
         
         function done(err, result) {
             if (err) {
-                console.warn("Warning: could not invoke python-jedi: ", err.message, stderr);
+                console.warn("[python_worker] Warning: could not invoke python-jedi: ", err.message, stderr);
                 return callback();
             }
             callback(err, result);
