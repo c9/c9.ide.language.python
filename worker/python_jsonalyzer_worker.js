@@ -11,10 +11,10 @@ var PluginBase = require("plugins/c9.ide.language.jsonalyzer/worker/jsonalyzer_b
 var ctagsUtil = require("plugins/c9.ide.language.jsonalyzer/worker/ctags/ctags_util");
 
 var TAGS = [
-    { regex: /(?:^|\n)\s*class\s+([^ \(:]+)/g, kind: "package" },
-    { regex: /(?:^|\n)\s*def\s+(?!_)([^ \(:]+)/g, kind: "method", indent: 1 },
+    { regex: /(?:^|\n)\s*class\s+([^ \(:]+)/g, kind: "unknown2" },
+    { regex: /(?:^|\n)\s*def\s+(?!_)([^ \(:]+)/g, kind: "method2", indent: 1 },
     { regex: /(?:^|\n)\s*def\s+(?!__[^ \(:]+__)(_[^ \(]*)/g, kind: "method2", indent: 1 },
-    { regex: /(?:^|\n)\s*def\s+(__[^ \(:]+__)/g, kind: "property", indent: 1 },
+    { regex: /(?:^|\n)\s*def\s+(__[^ \(:]+__)/g, kind: "property2", indent: 1 },
     {
         regex: new RegExp(
             "(?:^|\\n)\\s*import\\s+([^ \\(]+)"
