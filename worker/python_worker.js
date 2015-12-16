@@ -2,6 +2,7 @@ define(function(require, exports, module) {
 
 var baseHandler = require("plugins/c9.ide.language/base_handler");
 var workerUtil = require("plugins/c9.ide.language/worker_util");
+var ctagsUtil = require("plugins/c9.ide.language.jsonalyzer/worker/ctags/ctags_util");
 var jediComplete = require("./jedi_complete.py.js");
 var jediJumpToDef = require("./jedi_jumptodef.py.js");
 
@@ -31,6 +32,8 @@ handler.complete = function(doc, fullAst, pos, currentNode, callback) {
             r.guessTooltip = true;
             r.priority = r.name[0] === "_" ? 3 : 4;
             r.icon = r.name[0] === "_" ? r.icon.replace(/2?$/, "2") : r.icon;
+            // TODO: use custom docstring formatter or html converter
+            r.doc = ctagsUtil.filterDocumentation(r.doc);
         });
         console.log("[python_worker] Completed in " + (Date.now() - start) + "ms: " + line);
         callback(err, results);
