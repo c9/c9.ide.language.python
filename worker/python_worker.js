@@ -31,8 +31,12 @@ handler.complete = function(doc, fullAst, pos, currentNode, callback) {
             r.guessTooltip = true;
             r.priority = r.name[0] === "_" ? 3 : 4;
             r.icon = r.name[0] === "_" ? r.icon.replace(/2?$/, "2") : r.icon;
-            // TODO: use custom docstring formatter or html converter
-            r.doc = workerUtil.filterDocumentation(r.doc).replace(/``/g, "'");
+            if (!r.doc)
+                return;
+            var docLines = r.doc.split(/\r\n|\n|\r/);
+            var docBody = docLines.slice(2).join("\n");
+            r.docHeadHtml = workerUtil.filterDocumentation(docLines[0]);
+            r.doc = workerUtil.filterDocumentation(docBody.replace(/``/g, "'"));
         });
         console.log("[python_worker] Completed in " + (Date.now() - start) + "ms: " + line);
         callback(err, results);
