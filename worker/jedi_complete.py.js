@@ -17,7 +17,8 @@ def to_json(c):\n\
     return {\n\
         "name": c.name + ("(" + params + ")" if c.type == "function" else ""),\n\
         "replaceText": c.name + ("(^^)" if c.type == "function" else ""),\n\
-        "doc": abbrev(c.docstring()),\n\
+        "doc": c.type != "module" and # module docs dont work \n\
+            c.name + ":" + abbrev(c.docstring()),\n\
         "icon": {\n\
             "function": "method",\n\
             "module": "package",\n\
