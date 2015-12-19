@@ -4,7 +4,10 @@
  * @copyright 2015, Ajax.org B.V.
  */
 define(function(require, exports, module) {
-    main.consumes = ["Plugin", "language", "jsonalyzer", "preferences.experimental"];
+    main.consumes = [
+        "Plugin", "language", "jsonalyzer", "settings",
+        "preferences", "preferences.experimental"
+    ];
     main.provides = ["language.python"];
     return main;
 
@@ -13,6 +16,8 @@ define(function(require, exports, module) {
         var language = imports.language;
         var jsonalyzer = imports["jsonalyzer"];
         var experimental = imports["preferences.experimental"];
+        var prefs = imports.preferences;
+        var settings = imports.settings;
         var plugin = new Plugin("Ajax.org", main.consumes);
         
         var enabled = experimental.addExperiment("python_worker", false, "Language/Python Code Completion");;
@@ -22,6 +27,37 @@ define(function(require, exports, module) {
                 language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_worker");
             jsonalyzer.registerWorkerHandler("plugins/c9.ide.language.python/worker/python_jsonalyzer_worker");
             jsonalyzer.registerServerHandler("plugins/c9.ide.language.python/server/python_jsonalyzer_server_worker");
+            
+            prefs.add({
+                "Project": {
+                    "Language Support" : {
+                        position: 800,
+                        "Python Version" : {
+                            position: 300,
+                            type: "dropdown",
+                            path: "project/python/@version",
+                            items: [
+                                { caption: "Python 2", value: "python2" },
+                                { caption: "Python 3", value: "python3" },
+                            ]
+                        },
+                    }
+                }
+            }, plugin);
+            
+            settings.on("read", function(e) {
+                settings.setDefaults("project/python", [
+                    ["version", "python2"]
+                ]);
+            });
+            
+            settings.on("project/python", function(e) {
+                language.getWorker(function(err, worker) {
+                    if (err) return console.error(err);
+                    var version = settings.get("project/python/@version");
+                    worker.emit("set_python_version", { data: version });
+                });
+            });
         });
         
         /** @ignore */

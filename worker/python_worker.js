@@ -12,7 +12,15 @@ var KEYWORD_REGEX = new RegExp(
 );
 
 var handler = module.exports = Object.create(baseHandler);
+var pythonVersion = "python2";
 var showedJediError;
+
+handler.init = function(callback) {
+    handler.sender.on("set_python_version", function(e) {
+        pythonVersion = e.data;
+    });
+    callback();
+};
 
 handler.handlesLanguage = function(language) {
     return language === "python";
@@ -62,7 +70,7 @@ handler.jumpToDefinition = function(doc, fullAst, pos, currentNode, callback) {
 };
 
 function invoke(tool, pos, callback) {
-    workerUtil.execAnalysis("python", {
+    workerUtil.execAnalysis(pythonVersion, {
         args: [
             "-c",
             tool,
