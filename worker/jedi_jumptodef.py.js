@@ -10,7 +10,7 @@ script = jedi.Script(sys.stdin.read(), row, column, "name.py")\n\
 \n\
 def to_json(d):\n\
     return {\n\
-        "path": d.module_path,\n\
+        "path": "/" + d.module_path,\n\
         "row": d.line,\n\
         "column": d.column,\n\
     }\n\
