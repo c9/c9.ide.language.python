@@ -2,8 +2,8 @@ define(function(require, exports, module) {
 
 var baseHandler = require("plugins/c9.ide.language/base_handler");
 var workerUtil = require("plugins/c9.ide.language/worker_util");
-var jediComplete = require("./jedi_complete.py.js");
-var jediJumpToDef = require("./jedi_jumptodef.py.js");
+var jediComplete = require("./jedi_complete.py.js").replace(/ {4}/g, " ");
+var jediJumpToDef = require("./jedi_jumptodef.py.js").replace(/ {4}/g, " ");
 
 var KEYWORD_REGEX = new RegExp(
     "^(and|as|assert|break|class|continue|def|del|elif|else|except|exec|"

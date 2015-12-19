@@ -10,10 +10,10 @@ script = jedi.Script(sys.stdin.read(), row, column, "name.py")\n\
 \n\
 def to_json(c):\n\
     try:\n\
-      paramList = { p.description for p in c.params }\n\
-      params = ", ".join([p for p in paramList if p != None])\n\
+        paramList = { p.description for p in c.params }\n\
+        params = ", ".join([p for p in paramList if p != None])\n\
     except:\n\
-      params = ""\n\
+        params = ""\n\
     return {\n\
         "name": c.name + ("(" + params + ")" if c.type == "function" else ""),\n\
         "replaceText": c.name + ("(^^)" if c.type == "function" else ""),\n\
