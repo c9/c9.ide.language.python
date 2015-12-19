@@ -12,7 +12,7 @@ var KEYWORD_REGEX = new RegExp(
 );
 
 var handler = module.exports = Object.create(baseHandler);
-
+var showedJediError;
 
 handler.handlesLanguage = function(language) {
     return language === "python";
@@ -26,6 +26,8 @@ handler.complete = function(doc, fullAst, pos, currentNode, callback) {
     var start = Date.now();
     var line = doc.getLine(pos.row);
     invoke(jediComplete, pos, function(err, results) {
+        if (err) return callback(err);
+        
         results && results.forEach(function(r) {
             r.isContextual = true;
             r.guessTooltip = true;
@@ -39,7 +41,7 @@ handler.complete = function(doc, fullAst, pos, currentNode, callback) {
             r.doc = workerUtil.filterDocumentation(docBody.replace(/``/g, "'"));
         });
         console.log("[python_worker] Completed in " + (Date.now() - start) + "ms: " + line.substr(0, pos.column));
-        callback(err, results);
+        callback(null, results);
     });
 };
 
@@ -68,7 +70,13 @@ function invoke(tool, pos, callback) {
             String(pos.column),
         ]
     }, function onResult(err, stdout, stderr) {
-        if (err) return done(err);
+        if (err) {
+            if (!showedJediError && /No module named jedi/.test(err.message)) {
+                workerUtil.showError("Jedi not found. Please run 'pip install jedi' or 'sudo pip install jedi' to enable Python code completion.");
+                showedJediError = true;
+            }
+            return done(err);
+        }
         
         var result;
         try {
@@ -80,10 +88,6 @@ function invoke(tool, pos, callback) {
         done(null, result);
         
         function done(err, result) {
-            if (err) {
-                console.warn("[python_worker] Warning: could not invoke python-jedi: ", err.message, stderr);
-                return callback();
-            }
             callback(err, result);
         }
     });
