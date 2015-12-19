@@ -38,14 +38,16 @@ handler.complete = function(doc, fullAst, pos, currentNode, callback) {
             r.docHeadHtml = workerUtil.filterDocumentation(docLines[0]);
             r.doc = workerUtil.filterDocumentation(docBody.replace(/``/g, "'"));
         });
-        console.log("[python_worker] Completed in " + (Date.now() - start) + "ms: " + line);
+        console.log("[python_worker] Completed in " + (Date.now() - start) + "ms: " + line.substr(0, pos.column));
         callback(err, results);
     });
 };
 
 handler.predictNextCompletion = function(doc, fullAst, pos, options, callback) {
     var predicted = options.matches.filter(function(m) {
-        return !m.replaceText.match(KEYWORD_REGEX);
+        return m.isContextual
+            && m.icon !== "method"
+            && !m.replaceText.match(KEYWORD_REGEX);
     });
     if (predicted.length !== 1)
         return callback();
