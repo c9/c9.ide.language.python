@@ -59,12 +59,12 @@ handler.predictNextCompletion = function(doc, fullAst, pos, options, callback) {
             && m.icon !== "method"
             && !m.replaceText.match(KEYWORD_REGEX);
     });
-    if (predicted.length === 0) {
-        var line = doc.getLine(pos.row);
-        if ("import".substr(0, line.length) === line)
-            return "import ";
-    }
+    var line = doc.getLine(pos.row);
+    if (predicted.length === 0 && "import".substr(0, line.length) === line)
+        return callback("import ");
     if (predicted.length !== 1)
+        return callback();
+    if (/^\s+import /.test(line))
         return callback();
     console.log("[python_worker] Predicted our next completion will be for " + predicted[0].replaceText + ".");
     callback(null, { predicted: predicted[0].replaceText + "." });
