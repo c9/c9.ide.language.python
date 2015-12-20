@@ -15,6 +15,6 @@ def to_json(d):\n\
         "column": d.column,\n\
     }\n\
 \n\
-print json.dumps(script.goto_definitions(), default = to_json)\n\
+print(json.dumps(script.goto_definitions(), default = to_json))\n\
 ';
 });

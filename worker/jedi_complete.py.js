@@ -30,6 +30,6 @@ def to_json(c):\n\
 def abbrev(s):\n\
     return s if len(s) < 2500 else s[:2500] + "..."\n\
 \n\
-print json.dumps(script.completions(), default = to_json)\n\
+print(json.dumps(script.completions(), default = to_json))\n\
 ';
 });
