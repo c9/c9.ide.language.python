@@ -56,7 +56,7 @@ def to_json(mode):
             "replaceText": c.name + "(^^)" if c.type == "function" else None,
             "row": c.line if c.line else None,
             "column": c.column if c.column else None,
-            "path": c.module_path if c.module_path and mode == "goto_definitions" else None,
+            "path": "/" + c.module_path if c.module_path and mode == "goto_definitions" else None,
             "doc": abbrev(c.docstring()) if c.type != "module" else None, # module docs dont work
             "icon": {
                 "function": "method",
