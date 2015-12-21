@@ -3,18 +3,18 @@ import argparse
 import jedi
 import json
 import sys
+import urlparse
 from BaseHTTPServer import BaseHTTPRequestHandler
 from BaseHTTPServer import HTTPServer
-import urlparse
 
 def main(args):
     if args.mode != "daemon":
         print(run(sys.stdin.read(), args.__dict__))
         return
 
-    jedi.preload_module('os', 'sys', 'math')
+    jedi.preload_module("os", "sys", "math")
     try:
-        server = HTTPServer(('localhost', int(args.port)), Daemon)
+        server = HTTPServer(("localhost", int(args.port)), Daemon)
     except:
         sys.stderr.write("Daemon can't listen at :%s\n" % args.port)
         sys.exit(98)
@@ -24,17 +24,7 @@ def main(args):
 def run(source, args):
     script = jedi.Script(source, int(args.get("row")), int(args.get("column")), args.get("path"))
     try:
-        mode = args.get("mode")
-        if mode == 'completions':
-            result = script.completions()
-        elif mode == 'goto_definitions':
-            result = script.goto_definitions()
-        elif mode == 'goto_assignments':
-            result = script.goto_assignments()
-        elif mode == 'call_signatures':
-            result = script.call_signatures()
-        else:
-            raise
+        result = getattr(script, args.get("mode"))()
     except:
         result = []
     return json.dumps(result, default=to_json)
@@ -43,10 +33,10 @@ class Daemon(BaseHTTPRequestHandler):
     def do_POST(self):
         query = urlparse.urlparse(self.path).query
         args = urlparse.parse_qsl(query)
-        
-        length = int(self.headers.getheader('content-length', 0))
+
+        length = int(self.headers.getheader("content-length", 0))
         source = self.rfile.read(length)
-        
+
         self.send_response(200)
         self.end_headers()
         self.wfile.write(run(source, dict(args)))
@@ -87,12 +77,11 @@ def abbrev(s):
     return s if len(s) < 2500 else s[:2500] + "..."
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Run jedi functions over a script provided via stdin')
-    parser.add_argument('mode', help='Mode of operation', choices=['daemon', 'completions', 'goto_definitions', 'goto_assignments'])
-    parser.add_argument('--row', type=int, help='The row to read from')
-    parser.add_argument('--column', type=int, help='The column to read from')
-    parser.add_argument('--path', type=int, help='The path of the script')
-    parser.add_argument('--port', type=int, help='The port for the daemon to listen on')
-
+    parser = argparse.ArgumentParser(description="Run jedi functions over a script provided via stdin")
+    parser.add_argument("mode", help="Mode of operation", choices=["daemon", "completions", "goto_definitions", "goto_assignments"])
+    parser.add_argument("--row", type=int, help="The row to read from")
+    parser.add_argument("--column", type=int, help="The column to read from")
+    parser.add_argument("--path", type=int, help="The path of the script")
+    parser.add_argument("--port", type=int, help="The port for the daemon to listen on")
     args = parser.parse_args()
     main(args)
