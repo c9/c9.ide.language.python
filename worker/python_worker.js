@@ -10,6 +10,7 @@ var KEYWORD_REGEX = new RegExp(
 );
 var DAEMON_PORT = 7680;
 var ERROR_PORT_IN_USE = 98;
+var ERROR_NO_SERVER = 7;
 
 var handler = module.exports = Object.create(baseHandler);
 var pythonVersion = "python2";
@@ -118,6 +119,10 @@ function ensureDaemon(callback) {
     );
     
     function done(err) {
+        if (err && /No module named jedi/.test(err.message) && !showedJediError) {
+            workerUtil.showError("Jedi not found. Please run 'pip install jedi' or 'sudo pip install jedi' to enable Python code completion.");
+            showedJediError = true;
+        }
         callback && callback(err);
         callback = null;
     }
@@ -145,9 +150,9 @@ function callDaemon(command, path, doc, pos, callback) {
             },
             function onResult(err, stdout, stderr, meta) {
                 if (err) {
-                    if (!showedJediError && /No module named jedi/.test(err.message)) {
-                        workerUtil.showError("Jedi not found. Please run 'pip install jedi' or 'sudo pip install jedi' to enable Python code completion.");
-                        showedJediError = true;
+                    if (err.code === ERROR_NO_SERVER) {
+                        daemon = null;
+                        return callDaemon(command, path, doc, pos, callback);
                     }
                     return done(err);
                 }
