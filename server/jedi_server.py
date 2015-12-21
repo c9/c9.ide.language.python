@@ -40,6 +40,8 @@ class Daemon(BaseHTTPRequestHandler):
         self.send_response(200)
         self.end_headers()
         self.wfile.write(run(source, dict(args)))
+    def log_message(self, format, *args):
+        return # log silently
 
 def to_json(c):
     try:
@@ -53,8 +55,7 @@ def to_json(c):
         "replaceText": c.name + ("(^^)" if c.type == "function" else ""),
         "row": (c.line if c.line else None),
         "column": (c.column if c.column else None),
-        "module_path": (c.module_path if c.module_path else None),
-        "in_builtin_module": c.in_builtin_module(),
+        "path": (c.module_path if c.module_path else None),
         "doc": c.type != "module" and # module docs dont work
             c.name + ":" + abbrev(c.docstring()),
         "icon": {
