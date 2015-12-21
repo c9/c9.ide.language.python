@@ -40,9 +40,7 @@ handler.getCompletionRegex = function() {
 };
 
 handler.complete = function(doc, fullAst, pos, currentNode, callback) {
-    var start = Date.now();
-    var line = doc.getLine(pos.row);
-    callDaemon("completions", handler.path, pos, function(err, results) {
+    callDaemon("completions", handler.path, doc, pos, function(err, results, meta) {
         if (err) return callback(err);
         
         results && results.forEach(function(r) {
@@ -57,7 +55,6 @@ handler.complete = function(doc, fullAst, pos, currentNode, callback) {
             r.docHeadHtml = workerUtil.filterDocumentation(docLines[0]);
             r.doc = workerUtil.filterDocumentation(docBody.replace(/``/g, "'"));
         });
-        console.log("[python_worker] Completed in " + (Date.now() - start) + "ms: " + line.substr(0, pos.column));
         callback(null, results);
     });
 };
@@ -80,7 +77,7 @@ handler.predictNextCompletion = function(doc, fullAst, pos, options, callback) {
 };
 
 handler.jumpToDefinition = function(doc, fullAst, pos, currentNode, callback) {
-    callDaemon("goto_definitions", handler.path, pos, callback);
+    callDaemon("goto_definitions", handler.path, doc, pos, callback);
 };
 
 function ensureDaemon(callback) {
@@ -88,7 +85,7 @@ function ensureDaemon(callback) {
         return done(daemon.err);
 
     daemon = {
-        err: new Error("Starting daemon"),
+        err: new Error("Still starting daemon, please enhance your calm"),
         kill: function() {
             this.killed = true;
         }
@@ -126,10 +123,12 @@ function ensureDaemon(callback) {
     }
 }
 
-function callDaemon(command, path, pos, callback) {
+function callDaemon(command, path, doc, pos, callback) {
+    var line = doc.getLine(pos.row);
     ensureDaemon(function(err) {
         if (err) return callback(err);
         
+        var start = Date.now();
         workerUtil.execAnalysis(
             "curl",
             {
@@ -144,7 +143,7 @@ function callDaemon(command, path, pos, callback) {
                     
                 ]
             },
-            function onResult(err, stdout, stderr) {
+            function onResult(err, stdout, stderr, meta) {
                 if (err) {
                     if (!showedJediError && /No module named jedi/.test(err.message)) {
                         workerUtil.showError("Jedi not found. Please run 'pip install jedi' or 'sudo pip install jedi' to enable Python code completion.");
@@ -160,10 +159,14 @@ function callDaemon(command, path, pos, callback) {
                 catch (err) {
                     return done(new Error("Couldn't parse python-jedi output: " + stdout));
                 }
+                console.log("[python_worker] " + command + " in " + (Date.now() - start)
+                    + "ms (server: " + meta.serverTime + "ms): "
+                    + line.substr(0, pos.column));
+
                 done(null, result);
                 
                 function done(err, result) {
-                    callback(err, result);
+                    callback(err, result, meta);
                 }
             }
         );
