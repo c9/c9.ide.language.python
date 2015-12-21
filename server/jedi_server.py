@@ -4,19 +4,14 @@ import jedi
 import json
 import sys
 
-
-def abbrev(s):
-    return s if len(s) < 2500 else s[:2500] + "..."
-
-
-def to_json(c):
+def to_json(c, template):
     try:
         paramList = { p.description for p in c.params }
         params = ", ".join([p for p in paramList if p != None])
     except:
         params = ""
 
-    return {
+    return remove_nulls({
         "name": c.name + ("(" + params + ")" if c.type == "function" else ""),
         "replaceText": c.name + ("(^^)" if c.type == "function" else ""),
         "row": (c.line if c.line else None),
@@ -31,8 +26,18 @@ def to_json(c):
             "class": "property",
             "instance": "property"
         }.get(c.type, "property"),
-    }
+    })
 
+def remove_nulls(d):
+    for key, value in d.items():
+        if value is None:
+            del d[key]
+        elif isinstance(value, dict):
+            remove_nulls(value)
+    return d
+
+def abbrev(s):
+    return s if len(s) < 2500 else s[:2500] + "..."
 
 def main(args):
     script = jedi.Script(sys.stdin.read(), args.row, args.column)
