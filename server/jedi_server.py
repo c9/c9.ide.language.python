@@ -10,6 +10,8 @@ def main(args):
     if args.mode != "daemon":
         print(run(sys.stdin.read(), args.__dict__))
         return
+
+    jedi.preload_module('os', 'sys', 'math')
     from BaseHTTPServer import HTTPServer
     server = HTTPServer(('localhost', 7680), Daemon)
     print 'Starting daemon at :7680'
