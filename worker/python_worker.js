@@ -8,15 +8,22 @@ var KEYWORD_REGEX = new RegExp(
     + "finally|for|from|global|if|import|in|is|lambda|not|or|pass|print|"
     + "raise|return|try|while|with|yield)$"
 );
+var DAEMON_PORT = 7680;
+var ERROR_PORT_IN_USE = 98;
 
 var handler = module.exports = Object.create(baseHandler);
 var pythonVersion = "python2";
 var jediServer;
 var showedJediError;
+var daemon;
 
 handler.init = function(callback) {
     handler.sender.on("set_python_version", function(e) {
         pythonVersion = e.data;
+        if (daemon) {
+            daemon.kill();
+            daemon = null;
+        }
     });
     handler.sender.on("set_python_server", function(e) {
         jediServer = e.data;
@@ -35,7 +42,7 @@ handler.getCompletionRegex = function() {
 handler.complete = function(doc, fullAst, pos, currentNode, callback) {
     var start = Date.now();
     var line = doc.getLine(pos.row);
-    invoke("completions", pos, function(err, results) {
+    callDaemon("completions", handler.path, pos, function(err, results) {
         if (err) return callback(err);
         
         results && results.forEach(function(r) {
@@ -73,39 +80,93 @@ handler.predictNextCompletion = function(doc, fullAst, pos, options, callback) {
 };
 
 handler.jumpToDefinition = function(doc, fullAst, pos, currentNode, callback) {
-    invoke("goto_definitions", pos, callback);
+    callDaemon("goto_definitions", handler.path, pos, callback);
 };
 
-function invoke(command, pos, callback) {
-    workerUtil.execAnalysis(pythonVersion, {
-        args: [
-            "-c",
-            jediServer,
-            command,
-            String(pos.row + 1),
-            String(pos.column),
-        ]
-    }, function onResult(err, stdout, stderr) {
-        if (err) {
-            if (!showedJediError && /No module named jedi/.test(err.message)) {
-                workerUtil.showError("Jedi not found. Please run 'pip install jedi' or 'sudo pip install jedi' to enable Python code completion.");
-                showedJediError = true;
+function ensureDaemon(callback) {
+    if (daemon)
+        return done(daemon.err);
+
+    daemon = {
+        err: new Error("Starting daemon"),
+        kill: function() {
+            this.killed = true;
+        }
+    };
+    
+    workerUtil.spawn(
+        pythonVersion,
+        { args: ["-c", jediServer, "daemon", "--port", DAEMON_PORT] },
+        function(err, child) {
+            var output = "";
+            if (err)
+                workerUtil.showError("Could not start python completion daemon. Please reload to try again.");
+            if (child && daemon.killed)
+                child.kill();
+            daemon = child || daemon;
+            daemon.err = err;
+            child.stderr.on("data", function(data) {
+                if (/Daemon listening/.test(data))
+                    done();
+                output += data;
+            });
+            child.on("exit", function(code) {
+                if (code === ERROR_PORT_IN_USE)
+                    return done();
+                done(code && new Error("Command failed: " + output));
+                if (!code || /Daemon listening/.test(output))
+                    daemon = null;
+            });
+        }
+    );
+    
+    function done(err) {
+        callback && callback(err);
+        callback = null;
+    }
+}
+
+function callDaemon(command, path, pos, callback) {
+    ensureDaemon(function(err) {
+        if (err) return callback(err);
+        
+        workerUtil.execAnalysis(
+            "curl",
+            {
+                mode: "stdin",
+                args: [
+                    "-s",
+                    "--data-binary", "@-", // get input from stdin
+                    "localhost:" + DAEMON_PORT + "?mode=" + command
+                    + "&row=" + (pos.row + 1)
+                    + "&column=" + pos.column
+                    + "&path=",
+                    
+                ]
+            },
+            function onResult(err, stdout, stderr) {
+                if (err) {
+                    if (!showedJediError && /No module named jedi/.test(err.message)) {
+                        workerUtil.showError("Jedi not found. Please run 'pip install jedi' or 'sudo pip install jedi' to enable Python code completion.");
+                        showedJediError = true;
+                    }
+                    return done(err);
+                }
+                
+                var result;
+                try {
+                    result = JSON.parse(stdout);
+                }
+                catch (err) {
+                    return done(new Error("Couldn't parse python-jedi output: " + stdout));
+                }
+                done(null, result);
+                
+                function done(err, result) {
+                    callback(err, result);
+                }
             }
-            return done(err);
-        }
-        
-        var result;
-        try {
-            result = JSON.parse(stdout);
-        }
-        catch (err) {
-            return done(new Error("Couldn't parse python-jedi output: " + stdout));
-        }
-        done(null, result);
-        
-        function done(err, result) {
-            callback(err, result);
-        }
+        );
     });
 }
 

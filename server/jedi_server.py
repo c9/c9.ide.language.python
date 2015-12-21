@@ -4,6 +4,7 @@ import jedi
 import json
 import sys
 from BaseHTTPServer import BaseHTTPRequestHandler
+from BaseHTTPServer import HTTPServer
 import urlparse
 
 def main(args):
@@ -12,13 +13,15 @@ def main(args):
         return
 
     jedi.preload_module('os', 'sys', 'math')
-    from BaseHTTPServer import HTTPServer
-    server = HTTPServer(('localhost', 7680), Daemon)
-    print 'Starting daemon at :7680'
+    try:
+        server = HTTPServer(('localhost', int(args.port)), Daemon)
+    except:
+        sys.stderr.write("Daemon can't listen at :%s\n" % args.port)
+        sys.exit(98)
+    sys.stderr.write("Daemon listening at :%s\n" % args.port)
     server.serve_forever()
 
 def run(source, args):
-    print "run %s" % args
     script = jedi.Script(source, int(args.get("row")), int(args.get("column")), args.get("path"))
     try:
         mode = args.get("mode")
@@ -89,6 +92,7 @@ if __name__ == '__main__':
     parser.add_argument('--row', type=int, help='The row to read from')
     parser.add_argument('--column', type=int, help='The column to read from')
     parser.add_argument('--path', type=int, help='The path of the script')
+    parser.add_argument('--port', type=int, help='The port for the daemon to listen on')
 
     args = parser.parse_args()
     main(args)
