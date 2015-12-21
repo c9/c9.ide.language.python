@@ -19,12 +19,11 @@ define(function(require, exports, module) {
         var prefs = imports.preferences;
         var settings = imports.settings;
         var plugin = new Plugin("Ajax.org", main.consumes);
+        var jediServer = require("text!./server/jedi_server.py").replace(/ {4}/g, " ");
         
-        var enabled = experimental.addExperiment("python_worker", false, "Language/Python Code Completion");;
+        var enabled = experimental.addExperiment("python_worker", false, "Language/Python Code Completion");
         
         plugin.on("load", function() {
-            if (enabled)
-                language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_worker");
             jsonalyzer.registerWorkerHandler("plugins/c9.ide.language.python/worker/python_jsonalyzer_worker");
             jsonalyzer.registerServerHandler("plugins/c9.ide.language.python/server/python_jsonalyzer_server_worker");
             
@@ -51,12 +50,22 @@ define(function(require, exports, module) {
                 ]);
             });
             
+            if (!enabled)
+                return;
+                
             settings.on("project/python", function(e) {
                 language.getWorker(function(err, worker) {
                     if (err) return console.error(err);
                     var version = settings.get("project/python/@version");
                     worker.emit("set_python_version", { data: version });
                 });
+            });
+            
+            language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_worker", function(err, worker) {
+                if (err) return console.error(err);
+                var version = settings.get("project/python/@version");
+                worker.emit("set_python_version", { data: version });
+                worker.emit("set_python_server", { data: jediServer });
             });
         });
         

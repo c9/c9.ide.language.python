@@ -2,8 +2,6 @@ define(function(require, exports, module) {
 
 var baseHandler = require("plugins/c9.ide.language/base_handler");
 var workerUtil = require("plugins/c9.ide.language/worker_util");
-var jediComplete = require("./jedi_complete.py.js").replace(/ {4}/g, " ");
-var jediJumpToDef = require("./jedi_jumptodef.py.js").replace(/ {4}/g, " ");
 
 var KEYWORD_REGEX = new RegExp(
     "^(and|as|assert|break|class|continue|def|del|elif|else|except|exec|"
@@ -13,11 +11,15 @@ var KEYWORD_REGEX = new RegExp(
 
 var handler = module.exports = Object.create(baseHandler);
 var pythonVersion = "python2";
+var jediServer;
 var showedJediError;
 
 handler.init = function(callback) {
     handler.sender.on("set_python_version", function(e) {
         pythonVersion = e.data;
+    });
+    handler.sender.on("set_python_server", function(e) {
+        jediServer = e.data;
     });
     callback();
 };
@@ -33,7 +35,7 @@ handler.getCompletionRegex = function() {
 handler.complete = function(doc, fullAst, pos, currentNode, callback) {
     var start = Date.now();
     var line = doc.getLine(pos.row);
-    invoke(jediComplete, pos, function(err, results) {
+    invoke("completions", pos, function(err, results) {
         if (err) return callback(err);
         
         results && results.forEach(function(r) {
@@ -71,14 +73,15 @@ handler.predictNextCompletion = function(doc, fullAst, pos, options, callback) {
 };
 
 handler.jumpToDefinition = function(doc, fullAst, pos, currentNode, callback) {
-    invoke(jediJumpToDef, pos, callback);
+    invoke("goto_definitions", pos, callback);
 };
 
-function invoke(tool, pos, callback) {
+function invoke(command, pos, callback) {
     workerUtil.execAnalysis(pythonVersion, {
         args: [
             "-c",
-            tool,
+            jediServer,
+            command,
             String(pos.row + 1),
             String(pos.column),
         ]
