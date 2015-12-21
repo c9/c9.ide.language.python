@@ -50,14 +50,15 @@ def to_json(mode):
             params = ", ".join([p for p in paramList if p != None])
         except:
             params = ""
-    
         return remove_nulls({
             "name": c.name + ("(" + params + ")" if c.type == "function" else ""),
             "replaceText": c.name + "(^^)" if c.type == "function" else None,
             "row": c.line if c.line else None,
             "column": c.column if c.column else None,
             "path": "/" + c.module_path if c.module_path and mode == "goto_definitions" else None,
-            "doc": abbrev(c.docstring()) if c.type != "module" else None, # module docs dont work
+            "doc": abbrev(c.docstring()) if c.type != "module" # module docs dont work
+                                         and c.name[-2:] != "__" # skim on bandwidth
+                                         else None,
             "icon": {
                 "function": "method",
                 "module": "package",
