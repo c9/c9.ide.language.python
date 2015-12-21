@@ -51,6 +51,7 @@ handler.complete = function(doc, fullAst, pos, currentNode, callback) {
             r.isContextual = true;
             r.guessTooltip = true;
             r.priority = r.name[0] === "_" ? 3 : 4;
+            r.icon = r.icon || "property";
             r.icon = r.name[0] === "_" ? r.icon.replace(/2?$/, "2") : r.icon;
             if (!r.doc)
                 return;
@@ -107,13 +108,9 @@ function callDaemon(command, path, doc, pos, callback) {
             {
                 mode: "stdin",
                 args: [
-                    "-s",
-                    "--data-binary", "@-", // get input from stdin
+                    "-s", "--data-binary", "@-", // get input from stdin
                     "localhost:" + DAEMON_PORT + "?mode=" + command
-                    + "&row=" + (pos.row + 1)
-                    + "&column=" + pos.column
-                    + "&path=",
-                    
+                    + "&row=" + (pos.row + 1) + "&column=" + pos.column + "&path=",
                 ]
             },
             function onResult(err, stdout, stderr, meta) {

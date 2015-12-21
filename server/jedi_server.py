@@ -27,7 +27,7 @@ def run(source, args):
         result = getattr(script, args.get("mode"))()
     except:
         result = []
-    return json.dumps(result, default=to_json)
+    return json.dumps(result, default=to_json(args.get("mode")))
 
 class Daemon(BaseHTTPRequestHandler):
     def do_POST(self):
@@ -43,28 +43,28 @@ class Daemon(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
         return # log silently
 
-def to_json(c):
-    try:
-        paramList = { p.description for p in c.params }
-        params = ", ".join([p for p in paramList if p != None])
-    except:
-        params = ""
-
-    return remove_nulls({
-        "name": c.name + ("(" + params + ")" if c.type == "function" else ""),
-        "replaceText": c.name + ("(^^)" if c.type == "function" else ""),
-        "row": (c.line if c.line else None),
-        "column": (c.column if c.column else None),
-        "path": (c.module_path if c.module_path else None),
-        "doc": c.type != "module" and # module docs dont work
-            c.name + ":" + abbrev(c.docstring()),
-        "icon": {
-            "function": "method",
-            "module": "package",
-            "class": "property",
-            "instance": "property"
-        }.get(c.type, "property"),
-    })
+def to_json(mode):
+    def to_json(c):
+        try:
+            paramList = { p.description for p in c.params }
+            params = ", ".join([p for p in paramList if p != None])
+        except:
+            params = ""
+    
+        return remove_nulls({
+            "name": c.name + ("(" + params + ")" if c.type == "function" else ""),
+            "replaceText": c.name + "(^^)" if c.type == "function" else None,
+            "row": c.line if c.line else None,
+            "column": c.column if c.column else None,
+            "path": c.module_path if c.module_path and mode == "goto_definitions" else None,
+            "doc": abbrev(c.docstring()) if c.type != "module" else None, # module docs dont work
+            "icon": {
+                "function": "method",
+                "module": "package",
+                "class": "property",
+            }.get(c.type, None),
+        })
+    return to_json
 
 def remove_nulls(d):
     for key, value in d.items():
