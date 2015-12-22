@@ -80,7 +80,7 @@ def abbrev(s):
     return s if len(s) < 2500 else s[:2500] + "..."
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Run jedi functions over a script provided via stdin")
+    parser = argparse.ArgumentParser(description="Run jedi functions as a daemon or via stdin")
     parser.add_argument("mode", help="Mode of operation", choices=["daemon", "completions", "goto_definitions", "goto_assignments"])
     parser.add_argument("--row", type=int, help="The row to read from")
     parser.add_argument("--column", type=int, help="The column to read from")
