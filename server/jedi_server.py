@@ -44,6 +44,7 @@ class Daemon(BaseHTTPRequestHandler):
         return # log silently
 
 def to_json(mode):
+    include_pos = mode == "goto_definitions"
     def to_json(c):
         try:
             paramList = { p.description for p in c.params }
@@ -53,9 +54,9 @@ def to_json(mode):
         return remove_nulls({
             "name": c.name + ("(" + params + ")" if c.type == "function" else ""),
             "replaceText": c.name + "(^^)" if c.type == "function" else None,
-            "row": c.line if c.line else None,
-            "column": c.column if c.column else None,
-            "path": "/" + c.module_path if c.module_path and mode == "goto_definitions" else None,
+            "row": c.line if c.line and include_pos else None,
+            "column": c.column if c.column and include_pos else None,
+            "path": "/" + c.module_path if c.module_path and include_pos else None,
             "doc": abbrev(c.docstring()) if c.type != "module" # module docs dont work
                                          and c.name[-2:] != "__" # skim on bandwidth
                                          else None,
