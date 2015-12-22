@@ -8,7 +8,7 @@ var KEYWORD_REGEX = new RegExp(
     + "finally|for|from|global|if|import|in|is|lambda|not|or|pass|print|"
     + "raise|return|try|while|with|yield)$"
 );
-var DAEMON_PORT = 7680;
+var DAEMON_PORT = 10880;
 var ERROR_PORT_IN_USE = 98;
 var ERROR_NO_SERVER = 7;
 
@@ -145,7 +145,7 @@ function ensureDaemon(callback) {
         return done(daemon.err);
 
     daemon = {
-        err: new Error("Still starting daemon, please enhance your calm"),
+        err: new Error("Still starting daemon, enhance your calm"),
         kill: function() {
             this.killed = true;
         }
@@ -166,17 +166,21 @@ function ensureDaemon(callback) {
             if (daemon.killed)
                 daemon.kill();
             
+            // We (re)start the daemon after 10 minutes to conserve memory
+            var killTimer = setTimeout(daemon.kill.bind(daemon), 10 * 60 * 1000);
+            
             child.stderr.on("data", function(data) {
                 if (/Daemon listening/.test(data))
                     done();
                 output += data;
             });
             child.on("exit", function(code) {
-                if (code === ERROR_PORT_IN_USE)
+                if (code === ERROR_PORT_IN_USE) // someone else running daemon?
                     return done();
+                if (!code || /Daemon listening/.test(output)) // everything ok, try again later
+                    daemon = null;
+                clearTimeout(killTimer);
                 done(code && new Error("Command failed: " + output));
-                if (!code || /Daemon listening/.test(output))
-                    daemon = null; // No real problem, retry later
             });
         }
     );
