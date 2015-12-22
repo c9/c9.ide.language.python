@@ -69,6 +69,12 @@ define(function(require, exports, module) {
             });
         });
         
+        plugin.on("unload", function() {
+            jsonalyzer.unregisterWorkerHandler("plugins/c9.ide.language.python/worker/python_jsonalyzer_worker");
+            jsonalyzer.unregisterServerHandler("plugins/c9.ide.language.python/server/python_jsonalyzer_server_worker");
+            language.unregisterLanguageHandler("plugins/c9.ide.language.python/worker/python_worker");
+        });
+        
         /** @ignore */
         register(null, {
             "language.python": plugin
