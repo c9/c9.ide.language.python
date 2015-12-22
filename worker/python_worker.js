@@ -107,6 +107,7 @@ function callDaemon(command, path, doc, pos, callback) {
             "curl",
             {
                 mode: "stdin",
+                json: true,
                 args: [
                     "-s", "--data-binary", "@-", // get input from stdin
                     "localhost:" + DAEMON_PORT + "?mode=" + command
@@ -122,17 +123,14 @@ function callDaemon(command, path, doc, pos, callback) {
                     return callback(err);
                 }
                 
-                var result;
-                try {
-                    result = JSON.parse(stdout);
-                }
-                catch (err) {
+                if (typeof stdout !== "object")
                     return callback(new Error("Couldn't parse python-jedi output: " + stdout));
-                }
+                
                 console.log("[python_worker] " + command + " in " + (Date.now() - start)
-                    + "ms (server: " + meta.serverTime + "ms): " + line.substr(0, pos.column));
+                    + "ms (jedi: " + meta.serverTime + "ms, transferred: " + meta.size + "b): "
+                    + line.substr(0, pos.column));
 
-                callback(null, result, meta);
+                callback(null, stdout, meta);
             }
         );
     });
