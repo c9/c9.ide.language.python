@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import argparse
 import jedi
 import json
@@ -16,7 +15,7 @@ def main(args):
     try:
         server = HTTPServer(("localhost", int(args.port)), Daemon)
     except:
-        sys.stderr.write("Daemon can't listen at :%s\n" % args.port)
+        sys.stderr.write("Daemon unable to listen at :%s\n" % args.port)
         sys.exit(98)
     sys.stderr.write("Daemon listening at :%s\n" % args.port)
     server.serve_forever()
@@ -79,7 +78,7 @@ def remove_nulls(d):
 def abbrev(s):
     return s if len(s) < 2500 else s[:2500] + "..."
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run jedi functions as a daemon or via stdin")
     parser.add_argument("mode", help="Mode of operation", choices=["daemon", "completions", "goto_definitions", "goto_assignments"])
     parser.add_argument("--row", type=int, help="The row to read from")

@@ -157,8 +157,8 @@ function ensureDaemon(callback) {
         "bash",
         {
             args: [
-                "-c", launchCommand, "--",
-                pythonVersion, "-c", jediServer, "daemon", "--port", DAEMON_PORT
+                "-c", launchCommand, "--", PythonVersion,
+                "python -c '" + jediServer + "' daemon --port " + DAEMON_PORT
             ]
         },
         function(err, child) {

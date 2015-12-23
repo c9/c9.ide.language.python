@@ -60,13 +60,13 @@ define(function(require, exports, module) {
                     var version = settings.get("project/python/@version");
                     worker.emit("set_python_version", { data: version });
                 });
-            });
+            }, plugin);
             
             language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_worker", function(err, worker) {
                 if (err) return console.error(err);
                 var version = settings.get("project/python/@version");
                 worker.emit("set_python_version", { data: version });
-                worker.emit("set_python_scripts", { data: { jediServer: jediServer, launch: launchCommand } });
+                worker.emit("set_python_scripts", { data: { jediServer: jediServer, launchCommand: launchCommand } });
             });
         });
         
