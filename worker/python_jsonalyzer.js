@@ -52,23 +52,12 @@ handler.analyzeCurrent = function(path, doc, ast, options, callback) {
         ctagsUtil.findMatchingTags(path, doc, tag, GUESS_FARGS, EXTRACT_DOCS, results);
     });
 
-    var serverHandler = jsonalyzer.getServerHandlerFor(path, "py");
-    if (options.service || !serverHandler)
-        return callback(null, { properties: results });
-    
-    serverHandler.analyzeCurrent(path, doc, ast, { version: pythonVersion }, function(err, summary, markers) {
-        if (err && err.code === "ESUPERSEDED")
-            return callback(err);
-        if (err)
-            console.error(err.stack || err);
-        return callback(null, { properties: results }, markers);
-    });
+    return callback(null, { properties: results });
 };
 
 handler.analyzeOthers = handler.analyzeCurrentAll;
 
 handler.findImports = function(path, doc, ast, options, callback) {
-    // TODO: get open files + guess imports
     callback(null, ctagsUtil.findMatchingOpenFiles(path));
 };
 
