@@ -119,7 +119,7 @@ function callDaemon(command, path, doc, pos, callback) {
                 args: [
                     "-s", "--data-binary", "@-", // get input from stdin
                     "localhost:" + DAEMON_PORT + "?mode=" + command
-                    + "&row=" + (pos.row + 1) + "&column=" + pos.column + "&path=",
+                    + "&row=" + (pos.row + 1) + "&column=" + pos.column + "&path=" + path,
                 ]
             },
             function onResult(err, stdout, stderr, meta) {
