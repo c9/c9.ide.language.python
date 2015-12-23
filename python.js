@@ -49,7 +49,7 @@ define(function(require, exports, module) {
                 settings.setDefaults("project/python", [
                     ["version", "python2"]
                 ]);
-            });
+            }, plugin);
             
             if (!enabled)
                 return;
