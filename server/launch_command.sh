@@ -13,7 +13,7 @@ if [[ -d $SHAREDENV ]]; then
     source $ENV/bin/activate
     PYTHON="$ENV/bin/$PYTHON"
 elif which virtualenv &>/dev/null; then
-    ENV=$FALLBACK$ENVENV
+    ENV=$FALLBACKENV
     if ! [[ -d $ENV ]]; then
         virtualenv --python=$PYTHON $ENV
     fi

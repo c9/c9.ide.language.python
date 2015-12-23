@@ -183,9 +183,9 @@ function ensureDaemon(callback) {
             var killTimer = setTimeout(daemon.kill.bind(daemon), 10 * 60 * 1000);
             
             child.stderr.on("data", function(data) {
+                output += data;
                 if (/Daemon listening/.test(data))
                     done();
-                output += data;
             });
             child.on("exit", function(code) {
                 if (code === ERROR_PORT_IN_USE) // someone else running daemon?
@@ -193,7 +193,7 @@ function ensureDaemon(callback) {
                 if (!code || /Daemon listening/.test(output)) // everything ok, try again later
                     daemon = null;
                 clearTimeout(killTimer);
-                done(code && new Error("[python_worker] Command failed: " + output));
+                done(code && new Error("[python_worker] Daemon failed: " + output));
             });
         }
     );
