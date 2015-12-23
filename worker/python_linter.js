@@ -1,5 +1,5 @@
 /**
- * jsonalyzer Python code completion
+ * jsonalyzer Python code linting
  *
  * @copyright 2015, Ajax.org B.V.
  * @author Lennart Kats <lennart add c9.io>
@@ -66,7 +66,7 @@ handler.analyze = function(docValue, fullAst, callback) {
             maxCallInterval: 1200,
         },
         function(err, stdout, stderr) {
-            if (err) return callback(err);
+            if (err && err.code !== 2) return callback(err);
 
             stdout.split("\n").forEach(function(line) {
                 var match = line.match(/(\d+):(\d+): \[([^\]]+)\] (.*)/);

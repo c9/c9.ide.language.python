@@ -193,7 +193,7 @@ function ensureDaemon(callback) {
                 if (!code || /Daemon listening/.test(output)) // everything ok, try again later
                     daemon = null;
                 clearTimeout(killTimer);
-                done(code && new Error("Command failed: " + output));
+                done(code && new Error("[python_worker] Command failed: " + output));
             });
         }
     );
