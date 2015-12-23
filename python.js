@@ -6,7 +6,7 @@
 define(function(require, exports, module) {
     main.consumes = [
         "Plugin", "language", "jsonalyzer", "settings",
-        "preferences", "preferences.experimental"
+        "preferences", "preferences.experimental", "c9"
     ];
     main.provides = ["language.python"];
     return main;
@@ -18,6 +18,7 @@ define(function(require, exports, module) {
         var experimental = imports["preferences.experimental"];
         var prefs = imports.preferences;
         var settings = imports.settings;
+        var c9 = imports.c9;
         var plugin = new Plugin("Ajax.org", main.consumes);
         var jediServer = require("text!./server/jedi_server.py").replace(/ {4}/g, " ");
         var launchCommand = require("text!./server/launch_command.sh").replace(/ +/g, " ");
@@ -25,8 +26,7 @@ define(function(require, exports, module) {
         var enabled = experimental.addExperiment("python_worker", false, "Language/Python Code Completion");
         
         plugin.on("load", function() {
-            jsonalyzer.registerWorkerHandler("plugins/c9.ide.language.python/worker/python_jsonalyzer_worker");
-            jsonalyzer.registerServerHandler("plugins/c9.ide.language.python/server/python_jsonalyzer_server_worker");
+            jsonalyzer.registerWorkerHandler("plugins/c9.ide.language.python/worker/python_jsonalyzer");
             
             prefs.add({
                 "Project": {
@@ -62,18 +62,19 @@ define(function(require, exports, module) {
                 });
             }, plugin);
             
-            language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_worker", function(err, worker) {
+            language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_linter");
+            language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_completer", function(err, worker) {
                 if (err) return console.error(err);
                 var version = settings.get("project/python/@version");
                 worker.emit("set_python_version", { data: version });
-                worker.emit("set_python_scripts", { data: { jediServer: jediServer, launchCommand: launchCommand } });
+                worker.emit("set_python_scripts", { data: { jediServer: jediServer, launchCommand: launchCommand, ssh: c9.ssh } });
             });
         });
         
         plugin.on("unload", function() {
-            jsonalyzer.unregisterWorkerHandler("plugins/c9.ide.language.python/worker/python_jsonalyzer_worker");
-            jsonalyzer.unregisterServerHandler("plugins/c9.ide.language.python/server/python_jsonalyzer_server_worker");
-            language.unregisterLanguageHandler("plugins/c9.ide.language.python/worker/python_worker");
+            jsonalyzer.unregisterWorkerHandler("plugins/c9.ide.language.python/worker/python_jsonalyzer");
+            language.unregisterLanguageHandler("plugins/c9.ide.language.python/worker/python_completer");
+            language.unregisterLanguageHandler("plugins/c9.ide.language.python/worker/python_linter");
         });
         
         /** @ignore */

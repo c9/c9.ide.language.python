@@ -1,19 +1,20 @@
 /**
- * jsonalyzer python analysis
+ * jsonalyzer Python code completion
  *
- * @copyright 2013, Ajax.org B.V.
+ * @copyright 2015, Ajax.org B.V.
  * @author Lennart Kats <lennart add c9.io>
  */
 define(function(require, exports, module) {
 
-var PluginBase = require("plugins/c9.ide.language.jsonalyzer/worker/jsonalyzer_base_handler");
-var fs = require("fs");
-var crypto = require("crypto");
-var pathSep = require("path").sep;
+var baseHandler = require("plugins/c9.ide.language/base_handler");
+var workerUtil = require("plugins/c9.ide.language/worker_util");
 
-var handler = module.exports = Object.create(PluginBase);
-
-var OPTIONS = [
+var handler = module.exports = Object.create(baseHandler);
+var pythonVersion = "python2";
+var launchCommand;
+var ssh;
+var daemon;
+var PYLINT_OPTIONS = [
     "-d", "all",
     "-e", "E", 
     "-e", "F", 
@@ -23,59 +24,50 @@ var OPTIONS = [
     "-e", "W0612", // Unused variable
     "-e", "W0602", // Used global without assignment
     "-r", "n", 
-    "--msg-template={line}:{column}: [{msg_id}] {msg}"
+    "--msg-template={line}:{column}:\\ [{msg_id}]\\ {msg}"
 ];
 
-var TEMPDIR = process.env.TMP || process.env.TMPDIR || process.env.TEMP || '/tmp';
+handler.handlesLanguage = function(language) {
+    return language === "python";
+};
 
-handler.extensions = ["py"];
-
-handler.languages = ["py"];
-
-handler.maxCallInterval = handler.CALL_INTERVAL_BASIC;
-
-handler.init = function(options, callback) {
+handler.init = function(callback) {
+    handler.sender.on("set_python_version", function(e) {
+        pythonVersion = e.data;
+        if (daemon) {
+            daemon.kill();
+            daemon = null;
+        }
+    });
+    handler.sender.on("set_python_scripts", function(e) {
+        launchCommand = e.data.launchCommand;
+        ssh = e.data.ssh;
+    });
     callback();
 };
 
-handler.analyzeCurrent = function(path, doc, ast, options, callback) {
-    if (!doc)
-        return this.$exec(path, doc, callback);
-    
-    var tempFile = getTempFile() + ".py";
-    var that = this;
-    fs.writeFile(tempFile, doc, "utf8", function(err) {
-        if (err) {
-            err.code = "EFATAL";
-            return callback(err);
-        }
-        that.$exec(tempFile, doc, function(err, summary, markers) {
-            fs.unlink(tempFile, function(err2) {
-                if (err2) console.error(err2);
-                callback(err, summary, markers);
-            });
-        });
-    });
-};
+handler.analyze = function(docValue, fullAst, callback) {
+    // Get a copy of pylint. For ssh workspaces we need to use a helper script,
+    // in other cases we have the "pylint2" and "pylint3" commands.
+    var commands = ssh
+        ? ["-c", launchCommand, "--", pythonVersion, "$ENV/bin/pylint"]
+        : ["-c", pythonVersion === "python2" ? "pylint2" : "pylint3"];
+    commands[commands.length - 1] += " " + PYLINT_OPTIONS.join(" ") + " $FILE";
 
-function getTempFile() {
-    return TEMPDIR + pathSep + "c9_pyl_" + crypto
-        .randomBytes(6)
-        .toString("base64")
-        .slice(0, 6)
-        .replace(/[+\/]+/g, "");
-}
-
-handler.$exec = function(path, doc, callback) {
-    var starImport = /from\s+[^\s]+\s+import\s+\*/.test(doc);
-    this.$lint(
-        "pylint",
-        OPTIONS.concat(path),
+    // TODO: optimize - use a pylint daemon?
+    var starImport = /from\s+[^\s]+\s+import\s+\*/.test(docValue);
+    var markers = [];
+    workerUtil.execAnalysis(
+        "bash",
+        {
+            mode: "tempfile",
+            args: commands,
+            cwd: handler.path.replace(/^\//, "").replace(/[\/\\][^\/\\]+$/, ""),
+            maxCallInterval: 1200,
+        },
         function(err, stdout, stderr) {
             if (err) return callback(err);
 
-            var markers = [];
-            
             stdout.split("\n").forEach(function(line) {
                 var match = line.match(/(\d+):(\d+): \[([^\]]+)\] (.*)/);
                 if (!match)
@@ -104,7 +96,7 @@ handler.$exec = function(path, doc, callback) {
                 });
             });
             
-            callback(null, null, markers);
+            callback(null, markers);
         }
     );
 };

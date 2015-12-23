@@ -1,3 +1,9 @@
+/**
+ * jsonalyzer Python code completion
+ *
+ * @copyright 2015, Ajax.org B.V.
+ * @author Lennart Kats <lennart add c9.io>
+ */
 define(function(require, exports, module) {
 
 var baseHandler = require("plugins/c9.ide.language/base_handler");
@@ -19,6 +25,10 @@ var launchCommand;
 var showedJediError;
 var daemon;
 
+handler.handlesLanguage = function(language) {
+    return language === "python";
+};
+
 handler.init = function(callback) {
     handler.sender.on("set_python_version", function(e) {
         pythonVersion = e.data;
@@ -32,10 +42,6 @@ handler.init = function(callback) {
         launchCommand = e.data.launchCommand;
     });
     callback();
-};
-
-handler.handlesLanguage = function(language) {
-    return language === "python";
 };
 
 handler.getCompletionRegex = function() {
@@ -157,8 +163,8 @@ function ensureDaemon(callback) {
         "bash",
         {
             args: [
-                "-c", launchCommand, "--", PythonVersion,
-                "python -c '" + jediServer + "' daemon --port " + DAEMON_PORT
+                "-c", launchCommand, "--", pythonVersion,
+                "$PYTHON -c '" + jediServer + "' daemon --port " + DAEMON_PORT
             ]
         },
         function(err, child) {

@@ -1,5 +1,5 @@
 /**
- * jsonalyzer python analysis
+ * jsonalyzer Python linting & outline view
  *
  * @copyright 2013, Ajax.org B.V.
  * @author Lennart Kats <lennart add c9.io>
@@ -26,10 +26,17 @@ var GUESS_FARGS = true;
 var EXTRACT_DOCS = true;
 
 var handler = module.exports = Object.create(PluginBase);
+var pythonVersion;
 
 handler.languages = ["py"];
 
 handler.extensions = ["py"];
+
+handler.init = function() {
+    handler.sender.on("set_python_version", function(e) {
+        pythonVersion = e.data;
+    });
+};
 
 handler.analyzeCurrent = function(path, doc, ast, options, callback) {
     if (doc === "")
@@ -49,7 +56,7 @@ handler.analyzeCurrent = function(path, doc, ast, options, callback) {
     if (options.service || !serverHandler)
         return callback(null, { properties: results });
     
-    serverHandler.analyzeCurrent(path, doc, ast, options, function(err, summary, markers) {
+    serverHandler.analyzeCurrent(path, doc, ast, { version: pythonVersion }, function(err, summary, markers) {
         if (err && err.code === "ESUPERSEDED")
             return callback(err);
         if (err)

@@ -9,23 +9,29 @@ SHAREDENV="/mnt/shared/lib/$PYTHON"
 FALLBACKENV="$HOME/.c9/$PYTHON"
 
 if [[ -d $SHAREDENV ]]; then
-    source $SHAREDENV/bin/activate
-    PYTHON="$SHAREDENV/bin/$PYTHON"
+    ENV=$SHAREDENV
+    source $ENV/bin/activate
+    PYTHON="$ENV/bin/$PYTHON"
 elif which virtualenv &>/dev/null; then
-    if ! [[ -d $FALLBACKENV ]]; then
-        virtualenv --python=$PYTHON $FALLBACKENV
+    ENV=$FALLBACK$ENVENV
+    if ! [[ -d $ENV ]]; then
+        virtualenv --python=$PYTHON $ENV
     fi
 
-    source $FALLBACKENV/bin/activate
+    source $ENV/bin/activate
 
     if ! python -c 'import jedi' &>/dev/null; then
+        echo "Installing python support dependencies"
         pip install jedi >&2
+        pip install pylint >&2
     fi
 
-    PYTHON=$FALLBACKENV/bin/$PYTHON
+    PYTHON=$ENV/bin/$PYTHON
 else
-    echo 'Unable to run python script: virtualenv not installed'
+    echo 'Python support fatal error: virtualenv not installed'
     exit 1
 fi
 
-eval "${COMMAND/python/$PYTHON}"
+COMMAND=${COMMAND/\$PYTHON/$PYTHON}
+COMMAND=${COMMAND/\$ENV/$ENV}
+eval "$COMMAND"
