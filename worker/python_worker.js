@@ -15,6 +15,7 @@ var ERROR_NO_SERVER = 7;
 var handler = module.exports = Object.create(baseHandler);
 var pythonVersion = "python2";
 var jediServer;
+var launchCommand;
 var showedJediError;
 var daemon;
 
@@ -26,8 +27,9 @@ handler.init = function(callback) {
             daemon = null;
         }
     });
-    handler.sender.on("set_python_server", function(e) {
-        jediServer = e.data;
+    handler.sender.on("set_python_scripts", function(e) {
+        jediServer = e.data.jediServer;
+        launchCommand = e.data.launchCommand;
     });
     callback();
 };
@@ -152,8 +154,13 @@ function ensureDaemon(callback) {
     };
     
     workerUtil.spawn(
-        pythonVersion,
-        { args: ["-c", jediServer, "daemon", "--port", DAEMON_PORT] },
+        "bash",
+        {
+            args: [
+                "-c", launchCommand, "--",
+                pythonVersion, "-c", jediServer, "daemon", "--port", DAEMON_PORT
+            ]
+        },
         function(err, child) {
             var output = "";
             if (err) {

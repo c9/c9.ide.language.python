@@ -20,6 +20,7 @@ define(function(require, exports, module) {
         var settings = imports.settings;
         var plugin = new Plugin("Ajax.org", main.consumes);
         var jediServer = require("text!./server/jedi_server.py").replace(/ {4}/g, " ");
+        var launchCommand = require("text!./server/launch_command.sh").replace(/ +/g, " ");
         
         var enabled = experimental.addExperiment("python_worker", false, "Language/Python Code Completion");
         
@@ -65,7 +66,7 @@ define(function(require, exports, module) {
                 if (err) return console.error(err);
                 var version = settings.get("project/python/@version");
                 worker.emit("set_python_version", { data: version });
-                worker.emit("set_python_server", { data: jediServer });
+                worker.emit("set_python_scripts", { data: { jediServer: jediServer, launch: launchCommand } });
             });
         });
         
