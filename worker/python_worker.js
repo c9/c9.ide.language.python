@@ -101,7 +101,7 @@ handler.predictNextCompletion = function(doc, fullAst, pos, options, callback) {
  */
 function callDaemon(command, path, doc, pos, callback) {
     var line = doc.getLine(pos.row);
-    ensureDaemon(function(err) {
+    ensureDaemon(function(err, dontRetry) {
         if (err) return callback(err);
         
         var start = Date.now();
@@ -118,7 +118,7 @@ function callDaemon(command, path, doc, pos, callback) {
             },
             function onResult(err, stdout, stderr, meta) {
                 if (err) {
-                    if (err.code === ERROR_NO_SERVER) {
+                    if (err.code === ERROR_NO_SERVER && !dontRetry) {
                         daemon = null;
                         return callDaemon(command, path, doc, pos, callback);
                     }
@@ -183,7 +183,7 @@ function ensureDaemon(callback) {
             });
             child.on("exit", function(code) {
                 if (code === ERROR_PORT_IN_USE) // someone else running daemon?
-                    return done();
+                    return done(null, true);
                 if (!code || /Daemon listening/.test(output)) // everything ok, try again later
                     daemon = null;
                 clearTimeout(killTimer);
