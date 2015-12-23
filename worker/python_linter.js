@@ -47,15 +47,14 @@ handler.init = function(callback) {
 };
 
 handler.analyze = function(docValue, fullAst, callback) {
-    // Get a copy of pylint. For ssh workspaces we need to use a helper script,
+    // Get a copy of pylint. For ssh workspaces we need to use a helper script;
     // in other cases we have the "pylint2" and "pylint3" commands.
     var commands = ssh
         ? ["-c", launchCommand, "--", pythonVersion, "$ENV/bin/pylint"]
         : ["-c", pythonVersion === "python2" ? "pylint2" : "pylint3"];
     commands[commands.length - 1] += " " + PYLINT_OPTIONS.join(" ") + " $FILE";
 
-    // TODO: optimize - use a pylint daemon?
-    var starImport = /from\s+[^\s]+\s+import\s+\*/.test(docValue);
+    var hasStarImports = /from\s+[^\s]+\s+import\s+\*/.test(docValue);
     var markers = [];
     workerUtil.execAnalysis(
         "bash",
@@ -69,37 +68,42 @@ handler.analyze = function(docValue, fullAst, callback) {
             if (err && err.code !== 2) return callback(err);
 
             stdout.split("\n").forEach(function(line) {
-                var match = line.match(/(\d+):(\d+): \[([^\]]+)\] (.*)/);
-                if (!match)
-                    return;
-                var row = match[1];
-                var column = match[2];
-                var code = match[3];
-                var message = match[4];
-                var level = getLevel(code);
-                
-                if (/print statement used/.test(message))
-                    return;
-                if (starImport && /undefined variable/i.test(message)) {
-                    level = "info";
-                    message += "?";
-                }
-                    
-                markers.push({
-                    pos: {
-                        sl: parseInt(row, 10) - 1,
-                        sc: parseInt(column, 10)
-                    },
-                    message: message,
-                    code: code,
-                    level: level
-                });
+                var marker = parseLine(line, hasStarImports);
+                marker && markers.push(marker);
             });
             
             callback(null, markers);
         }
     );
 };
+
+function parseLine(line, hasStarImports) {
+    var match = line.match(/(\d+):(\d+): \[([^\]]+)\] (.*)/);
+    if (!match)
+        return;
+    var row = match[1];
+    var column = match[2];
+    var code = match[3];
+    var message = match[4];
+    var level = getLevel(code);
+    
+    if (/print statement used/.test(message))
+        return;
+    if (hasStarImports && /undefined variable/i.test(message)) {
+        level = "info";
+        message += "?";
+    }
+        
+    return {
+        pos: {
+            sl: parseInt(row, 10) - 1,
+            sc: parseInt(column, 10)
+        },
+        message: message,
+        code: code,
+        level: level
+    };
+}
 
 function getLevel(code) {
     if (code[0] === "E" || code[0] === "F")
