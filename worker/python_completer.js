@@ -98,7 +98,10 @@ handler.predictNextCompletion = function(doc, fullAst, pos, options, callback) {
     if (/^\s+import /.test(line))
         return callback();
     console.log("[python_worker] Predicted our next completion will be for " + predicted[0].replaceText + ".");
-    callback(null, { predicted: predicted[0].replaceText + "." });
+    callback(null, {
+        predicted: predicted[0].replaceText + ".",
+        showEarly: predicted[0].replaceText === "self"
+    });
 };
 
 /**
