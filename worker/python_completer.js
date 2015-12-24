@@ -100,7 +100,7 @@ handler.predictNextCompletion = function(doc, fullAst, pos, options, callback) {
     console.log("[python_worker] Predicted our next completion will be for " + predicted[0].replaceText + ".");
     callback(null, {
         predicted: predicted[0].replaceText + ".",
-        showEarly: predicted[0].replaceText === "self"
+        showEarly: predicted[0].replaceText === "self" || predicted[0].icon === "package"
     });
 };
 
