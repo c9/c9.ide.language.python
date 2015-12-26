@@ -32,16 +32,17 @@ handler.handlesLanguage = function(language) {
 };
 
 handler.init = function(callback) {
-    handler.sender.on("set_python_version", function(e) {
-        pythonVersion = e.data;
+    var emitter = handler.getEmitter("plugins/c9.ide.language.python/worker/python_completer");
+    emitter.on("set_python_version", function(e) {
+        pythonVersion = e;
         if (daemon) {
             daemon.kill();
             daemon = null;
         }
     });
-    handler.sender.on("set_python_scripts", function(e) {
-        launchCommand = e.data.launchCommand;
-        ssh = e.data.ssh;
+    emitter.on("set_python_scripts", function(e) {
+        launchCommand = e.launchCommand;
+        ssh = e.ssh;
     });
     callback();
 };
