@@ -52,7 +52,7 @@ handler.getCompletionRegex = function() {
 /**
  * Complete code at the current cursor position.
  */
-handler.complete = function(doc, fullAst, pos, currentNode, callback) {
+handler.complete = function(doc, fullAst, pos, options, callback) {
     callDaemon("completions", handler.path, doc, pos, function(err, results, meta) {
         if (err) return callback(err);
         
@@ -76,7 +76,7 @@ handler.complete = function(doc, fullAst, pos, currentNode, callback) {
 /**
  * Jump to the definition of what's under the cursor.
  */
-handler.jumpToDefinition = function(doc, fullAst, pos, currentNode, callback) {
+handler.jumpToDefinition = function(doc, fullAst, pos, options, callback) {
     callDaemon("goto_definitions", handler.path, doc, pos, callback);
 };
 
