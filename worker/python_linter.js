@@ -47,7 +47,7 @@ handler.init = function(callback) {
     callback();
 };
 
-handler.analyze = function(docValue, fullAst, callback) {
+handler.analyze = function(docValue, fullAst, options, callback) {
     // Get a copy of pylint. For ssh workspaces we need to use a helper script;
     // in other cases we have the "pylint2" and "pylint3" commands.
     var commands = ssh
