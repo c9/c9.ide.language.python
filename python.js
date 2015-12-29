@@ -53,19 +53,21 @@ define(function(require, exports, module) {
             
             if (!enabled)
                 return;
-            
-            language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_completer", function(err, handler) {
-                if (err) return console.error(err);
-                language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_linter", function(err, handler) {
+                
+            settings.on("project/python", function(e) {
+                language.getWorker(function(err, worker) {
                     if (err) return console.error(err);
                     var version = settings.get("project/python/@version");
-                    handler.emit("set_python_version", version);
-                    handler.emit("set_python_scripts", { jediServer: jediServer, launchCommand: launchCommand, ssh: c9.ssh });
-    
-                    settings.on("project/python", function(e) {
-                        handler.emit("set_python_version", version);
-                    }, plugin);
+                    worker.emit("set_python_version", { data: version });
                 });
+            }, plugin);
+            
+            language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_linter");
+            language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_completer", function(err, worker) {
+                if (err) return console.error(err);
+                var version = settings.get("project/python/@version");
+                worker.emit("set_python_version", { data: version });
+                worker.emit("set_python_scripts", { data: { jediServer: jediServer, launchCommand: launchCommand, ssh: c9.ssh } });
             });
         });
         

@@ -32,22 +32,21 @@ handler.handlesLanguage = function(language) {
 };
 
 handler.init = function(callback) {
-    var emitter = handler.getEmitter("plugins/c9.ide.language.python/worker/python_completer");
-    emitter.on("set_python_version", function(e) {
-        pythonVersion = e;
+    handler.sender.on("set_python_version", function(e) {
+        pythonVersion = e.data;
         if (daemon) {
             daemon.kill();
             daemon = null;
         }
     });
-    emitter.on("set_python_scripts", function(e) {
-        launchCommand = e.launchCommand;
-        ssh = e.ssh;
+    handler.sender.on("set_python_scripts", function(e) {
+        launchCommand = e.data.launchCommand;
+        ssh = e.data.ssh;
     });
     callback();
 };
 
-handler.analyze = function(docValue, fullAst, options, callback) {
+handler.analyze = function(docValue, fullAst, callback) {
     // Get a copy of pylint. For ssh workspaces we need to use a helper script;
     // in other cases we have the "pylint2" and "pylint3" commands.
     var commands = ssh
