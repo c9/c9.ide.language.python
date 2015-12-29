@@ -56,7 +56,7 @@ define(function(require, exports, module) {
             
             language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_completer", function(err, handler) {
                 if (err) return console.error(err);
-                language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_linter", function(err, handler2) {
+                language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_linter", function(err, handler) {
                     if (err) return console.error(err);
                     var version = settings.get("project/python/@version");
                     handler.emit("set_python_version", version);
