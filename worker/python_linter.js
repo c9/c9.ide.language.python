@@ -32,7 +32,7 @@ handler.handlesLanguage = function(language) {
 };
 
 handler.init = function(callback) {
-    var emitter = handler.getEmitter("plugins/c9.ide.language.python/worker/python_completer");
+    var emitter = handler.getEmitter();
     emitter.on("set_python_version", function(e) {
         pythonVersion = e;
         if (daemon) {

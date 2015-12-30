@@ -54,20 +54,21 @@ define(function(require, exports, module) {
             if (!enabled)
                 return;
             
-            language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_completer", function(err, handler) {
-                if (err) return console.error(err);
-                language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_linter", function(err, handler2) {
-                    if (err) return console.error(err);
-                    var version = settings.get("project/python/@version");
-                    handler.emit("set_python_version", version);
-                    handler.emit("set_python_scripts", { jediServer: jediServer, launchCommand: launchCommand, ssh: c9.ssh });
-    
-                    settings.on("project/python", function(e) {
-                        handler.emit("set_python_version", version);
-                    }, plugin);
-                });
-            });
+            language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_completer", setupHandler);
+            language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_linter", setupHandler);
         });
+            
+        function setupHandler(err, handler) {
+            if (err) return console.error(err);
+            
+            var version = settings.get("project/python/@version");
+            handler.emit("set_python_version", version);
+            handler.emit("set_python_scripts", { jediServer: jediServer, launchCommand: launchCommand, ssh: c9.ssh });
+
+            settings.on("project/python", function(e) {
+                handler.emit("set_python_version", version);
+            }, plugin);
+        }
         
         plugin.on("unload", function() {
             jsonalyzer.unregisterWorkerHandler("plugins/c9.ide.language.python/worker/python_jsonalyzer");
