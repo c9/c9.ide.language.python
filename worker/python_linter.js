@@ -13,7 +13,6 @@ var handler = module.exports = Object.create(baseHandler);
 var pythonVersion = "python2";
 var launchCommand;
 var ssh;
-var daemon;
 var PYLINT_OPTIONS = [
     "-d", "all",
     "-e", "E", 
@@ -33,12 +32,8 @@ handler.handlesLanguage = function(language) {
 
 handler.init = function(callback) {
     var emitter = handler.getEmitter();
-    emitter.on("set_python_version", function(e) {
-        pythonVersion = e;
-        if (daemon) {
-            daemon.kill();
-            daemon = null;
-        }
+    emitter.on("set_python_config", function(e) {
+        pythonVersion = e.pythonVersion;
     });
     emitter.on("set_python_scripts", function(e) {
         launchCommand = e.launchCommand;

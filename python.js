@@ -47,28 +47,50 @@ define(function(require, exports, module) {
             
             settings.on("read", function(e) {
                 settings.setDefaults("project/python", [
-                    ["version", "python2"]
+                    ["version", "python2"],
+                    ["path", "/usr/local/lib/python2.7/dist-packages:/usr/local/lib/python3.4/dist-packages"]
                 ]);
             }, plugin);
             
-            language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_linter", setupHandler);
+            language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_linter", function(err, handler) {
+                if (err) return console.error(err);
+                setupHandler(handler);
+            });
             
             if (!enabled)
                 return;
             
-            language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_completer", setupHandler);
+            // TODO: move this into preferences block above when this plugin is no longer experimental
+            prefs.add({
+                "Project": {
+                    "Language Support" : {
+                        position: 800,
+                        "PYTHONPATH For Code Completion" : {
+                            position: 300,
+                            type: "textbox",
+                            path: "project/python/@path"
+                        },
+                    }
+                }
+            }, plugin);
+            
+            language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_completer", function(err, handler) {
+                if (err) return console.error(err);
+                setupHandler(handler);
+            });
         });
             
-        function setupHandler(err, handler) {
-            if (err) return console.error(err);
-            
-            var version = settings.get("project/python/@version");
-            handler.emit("set_python_version", version);
+        function setupHandler(handler) {
             handler.emit("set_python_scripts", { jediServer: jediServer, launchCommand: launchCommand, ssh: c9.ssh });
-
-            settings.on("project/python", function(e) {
-                handler.emit("set_python_version", version);
-            }, plugin);
+            settings.on("project/python", sendSettings.bind(null, handler), plugin);
+            sendSettings(handler);
+        }
+        
+        function sendSettings(handler) {
+            handler.emit("set_python_config", {
+                pythonVersion: settings.get("project/python/@version"),
+                pythonPath: settings.get("project/python/@path"),
+            });
         }
         
         plugin.on("unload", function() {
