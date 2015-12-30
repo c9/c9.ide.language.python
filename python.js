@@ -51,11 +51,12 @@ define(function(require, exports, module) {
                 ]);
             }, plugin);
             
+            language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_linter", setupHandler);
+            
             if (!enabled)
                 return;
             
             language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_completer", setupHandler);
-            language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_linter", setupHandler);
         });
             
         function setupHandler(err, handler) {
