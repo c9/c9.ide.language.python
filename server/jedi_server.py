@@ -2,9 +2,13 @@ import argparse
 import jedi
 import json
 import sys
-import urlparse
-from BaseHTTPServer import BaseHTTPRequestHandler
-from BaseHTTPServer import HTTPServer
+import os
+try: # python 2
+    import urlparse
+    from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+except: # python 3
+    import urllib.parse as urlparse
+    from http.server import BaseHTTPRequestHandler, HTTPServer
 
 def main(args):
     if args.mode != "daemon":
