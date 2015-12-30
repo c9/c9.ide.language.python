@@ -2,9 +2,13 @@ import argparse
 import jedi
 import json
 import sys
-import urlparse
-from BaseHTTPServer import BaseHTTPRequestHandler
-from BaseHTTPServer import HTTPServer
+import os
+try: # python 2
+    import urlparse
+    from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+except: # python 3
+    import urllib.parse as urlparse
+    from http.server import BaseHTTPRequestHandler, HTTPServer
 
 def main(args):
     if args.mode != "daemon":
@@ -83,7 +87,7 @@ if __name__ == "__main__":
     parser.add_argument("mode", help="Mode of operation", choices=["daemon", "completions", "goto_definitions", "goto_assignments"])
     parser.add_argument("--row", type=int, help="The row to read from")
     parser.add_argument("--column", type=int, help="The column to read from")
-    parser.add_argument("--path", type=int, help="The path of the script")
+    parser.add_argument("--path", help="The path of the script")
     parser.add_argument("--port", type=int, help="The port for the daemon to listen on")
     args = parser.parse_args()
     main(args)

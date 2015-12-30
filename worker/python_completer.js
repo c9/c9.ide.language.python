@@ -20,6 +20,7 @@ var ERROR_NO_SERVER = 7;
 
 var handler = module.exports = Object.create(baseHandler);
 var pythonVersion = "python2";
+var pythonPath = "";
 var jediServer;
 var launchCommand;
 var showedJediError;
@@ -30,14 +31,16 @@ handler.handlesLanguage = function(language) {
 };
 
 handler.init = function(callback) {
-    handler.sender.on("set_python_version", function(e) {
-        pythonVersion = e.data;
+    var emitter = handler.sender;
+    emitter.on("set_python_config", function(e) {
+        pythonVersion = e.data.pythonVersion;
+        pythonPath = e.data.pythonPath;
         if (daemon) {
             daemon.kill();
             daemon = null;
         }
     });
-    handler.sender.on("set_python_scripts", function(e) {
+    emitter.on("set_python_scripts", function(e) {
         jediServer = e.data.jediServer;
         launchCommand = e.data.launchCommand;
     });
@@ -122,8 +125,9 @@ function callDaemon(command, path, doc, pos, callback) {
                 args: [
                     "-s", "--data-binary", "@-", // get input from stdin
                     "localhost:" + DAEMON_PORT + "?mode=" + command
-                    + "&row=" + (pos.row + 1) + "&column=" + pos.column + "&path=" + path,
-                ]
+                    + "&row=" + (pos.row + 1) + "&column=" + pos.column
+                    + "&path=" + path.replace(/^\//, ""),
+                ],
             },
             function onResult(err, stdout, stderr, meta) {
                 if (err) {
@@ -166,9 +170,9 @@ function ensureDaemon(callback) {
         "bash",
         {
             args: [
-                "-c", launchCommand, "--", pythonVersion,
+                "-c", launchCommand, "--", pythonVersion, pythonPath,
                 "$PYTHON -c '" + jediServer + "' daemon --port " + DAEMON_PORT
-            ]
+            ],
         },
         function(err, child) {
             var output = "";

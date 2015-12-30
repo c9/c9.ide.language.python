@@ -47,29 +47,51 @@ define(function(require, exports, module) {
             
             settings.on("read", function(e) {
                 settings.setDefaults("project/python", [
-                    ["version", "python2"]
+                    ["version", "python2"],
+                    ["path", options.pythonPath || "/usr/local/lib/python2.7/dist-packages:/usr/local/lib/python3.4/dist-packages"]
                 ]);
             }, plugin);
             
+            language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_linter", function(err, worker) {
+                if (err) return console.error(err);
+                setupHandler(worker);
+            });
+            
             if (!enabled)
                 return;
-                
-            settings.on("project/python", function(e) {
-                language.getWorker(function(err, worker) {
-                    if (err) return console.error(err);
-                    var version = settings.get("project/python/@version");
-                    worker.emit("set_python_version", { data: version });
-                });
+            
+            // TODO: move this into preferences block above when this plugin is no longer experimental
+            prefs.add({
+                "Project": {
+                    "Language Support" : {
+                        position: 800,
+                        "PYTHONPATH For Code Completion" : {
+                            position: 300,
+                            type: "textbox",
+                            path: "project/python/@path"
+                        },
+                    }
+                }
             }, plugin);
             
-            language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_linter");
             language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_completer", function(err, worker) {
                 if (err) return console.error(err);
-                var version = settings.get("project/python/@version");
-                worker.emit("set_python_version", { data: version });
-                worker.emit("set_python_scripts", { data: { jediServer: jediServer, launchCommand: launchCommand, ssh: c9.ssh } });
+                setupHandler(worker);
             });
         });
+            
+        function setupHandler(worker) {
+            worker.emit("set_python_scripts", { data: { jediServer: jediServer, launchCommand: launchCommand, ssh: c9.ssh } });
+            settings.on("project/python", sendSettings.bind(null, worker), plugin);
+            sendSettings(worker);
+        }
+        
+        function sendSettings(worker) {
+            worker.emit("set_python_config", { data: {
+                pythonVersion: settings.get("project/python/@version"),
+                pythonPath: settings.get("project/python/@path"),
+            }});
+        }
         
         plugin.on("unload", function() {
             jsonalyzer.unregisterWorkerHandler("plugins/c9.ide.language.python/worker/python_jsonalyzer");
