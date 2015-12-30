@@ -48,7 +48,7 @@ define(function(require, exports, module) {
             settings.on("read", function(e) {
                 settings.setDefaults("project/python", [
                     ["version", "python2"],
-                    ["path", "/usr/local/lib/python2.7/dist-packages:/usr/local/lib/python3.4/dist-packages"]
+                    ["path", options.pythonPath || "/usr/local/lib/python2.7/dist-packages:/usr/local/lib/python3.4/dist-packages"]
                 ]);
             }, plugin);
             
