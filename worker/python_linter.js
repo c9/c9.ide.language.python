@@ -59,7 +59,7 @@ handler.analyze = function(docValue, fullAst, callback) {
         {
             mode: "tempfile",
             args: commands,
-            cwd: handler.path.replace(/^\//, "").replace(/[\/\\][^\/\\]+$/, ""),
+            cwd: handler.path.replace(/[\/\\][^\/\\]+$/, "").replace(/^\//, ""),
             maxCallInterval: 1200,
             env: {
                 PYTHONPATH: pythonPath
