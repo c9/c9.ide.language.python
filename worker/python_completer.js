@@ -68,7 +68,7 @@ handler.complete = function(doc, fullAst, pos, currentNode, callback) {
                 return;
             var docLines = r.doc.split(/\r\n|\n|\r/);
             var docBody = docLines.slice(2).join("\n");
-            r.docHeadHtml = workerUtil.filterDocumentation(docLines[0]);
+            r.docHeadHtml = workerUtil.filterDocumentation(docLines[0]).replace(/^([A-Za-z0-9$_]+\()self, /, "$1");
             r.doc = workerUtil.filterDocumentation(docBody.replace(/``/g, "'"));
         });
         callback(null, results);
