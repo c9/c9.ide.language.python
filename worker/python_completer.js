@@ -170,9 +170,10 @@ function ensureDaemon(callback) {
         "bash",
         {
             args: [
-                "-c", launchCommand, "--", pythonVersion, pythonPath,
+                "-c", launchCommand, "--", pythonVersion,
                 "$PYTHON -c '" + jediServer + "' daemon --port " + DAEMON_PORT
             ],
+            env: { PYTHONPATH: pythonPath },
         },
         function(err, child) {
             var output = "";
