@@ -41,6 +41,11 @@ define(function(require, exports, module) {
                                 { caption: "Python 3", value: "python3" },
                             ]
                         },
+                        "PYTHONPATH" : {
+                            position: 300,
+                            type: "textbox",
+                            path: "project/python/@path"
+                        },
                     }
                 }
             }, plugin);
@@ -59,20 +64,6 @@ define(function(require, exports, module) {
             
             if (!enabled)
                 return;
-            
-            // TODO: move this into preferences block above when this plugin is no longer experimental
-            prefs.add({
-                "Project": {
-                    "Language Support" : {
-                        position: 800,
-                        "PYTHONPATH For Code Completion" : {
-                            position: 300,
-                            type: "textbox",
-                            path: "project/python/@path"
-                        },
-                    }
-                }
-            }, plugin);
             
             language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_completer", function(err, worker) {
                 if (err) return console.error(err);
