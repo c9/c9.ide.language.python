@@ -47,8 +47,18 @@ handler.init = function(callback) {
     callback();
 };
 
+handler.getIdentifierRegex = function() {
+    return /\w/;
+};
+
 handler.getCompletionRegex = function() {
-    return (/^([\.]|\bimport )$/);
+    return (/(\.|\b(import|from|if|while|from|raise|return) )$/); 
+};
+
+handler.getExpressionPrefixRegex = function() {
+     // Match strings that can be and expression or its prefix, i.e.
+     // keywords/identifiers followed by whitespace and/or operators
+    return /(\b\w+\s+|\b(if|while|for)\s+\(|[{[\-+*%<>!|&/]\s*)+/;
 };
 
 /**
