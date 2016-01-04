@@ -32,19 +32,19 @@ handler.handlesLanguage = function(language) {
 };
 
 handler.init = function(callback) {
-    var emitter = handler.sender;
+    var emitter = handler.getEmitter();
     emitter.on("set_python_config", function(e) {
-        pythonVersion = e.data.pythonVersion;
-        pythonPath = e.data.pythonPath;
+        pythonVersion = e.pythonVersion;
+        pythonPath = e.pythonPath;
     });
     emitter.on("set_python_scripts", function(e) {
-        launchCommand = e.data.launchCommand;
-        ssh = e.data.ssh;
+        launchCommand = e.launchCommand;
+        ssh = e.ssh;
     });
     callback();
 };
 
-handler.analyze = function(docValue, fullAst, callback) {
+handler.analyze = function(docValue, fullAst, options, callback) {
     // Get a copy of pylint. For ssh workspaces we need to use a helper script;
     // in other cases we have the "pylint2" and "pylint3" commands.
     var commands = ssh
@@ -59,7 +59,6 @@ handler.analyze = function(docValue, fullAst, callback) {
         {
             mode: "tempfile",
             args: commands,
-            cwd: handler.path.replace(/^\//, "").replace(/[\/\\][^\/\\]+$/, ""),
             maxCallInterval: 1200,
             env: {
                 PYTHONPATH: pythonPath

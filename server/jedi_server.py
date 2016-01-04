@@ -51,7 +51,7 @@ def to_json(mode):
     def to_json(c):
         try:
             paramList = { p.description for p in c.params }
-            params = ", ".join([p for p in paramList if p != None])
+            params = ", ".join([p for p in paramList if p != None and p != "self"])
         except:
             params = ""
         return remove_nulls({

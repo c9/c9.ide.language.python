@@ -57,31 +57,31 @@ define(function(require, exports, module) {
                 ]);
             }, plugin);
             
-            language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_linter", function(err, worker) {
+            language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_linter", function(err, handler) {
                 if (err) return console.error(err);
-                setupHandler(worker);
+                setupHandler(handler);
             });
             
             if (!enabled)
                 return;
             
-            language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_completer", function(err, worker) {
+            language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_completer", function(err, handler) {
                 if (err) return console.error(err);
-                setupHandler(worker);
+                setupHandler(handler);
             });
         });
             
-        function setupHandler(worker) {
-            worker.emit("set_python_scripts", { data: { jediServer: jediServer, launchCommand: launchCommand, ssh: c9.ssh } });
-            settings.on("project/python", sendSettings.bind(null, worker), plugin);
-            sendSettings(worker);
+        function setupHandler(handler) {
+            handler.emit("set_python_scripts", { jediServer: jediServer, launchCommand: launchCommand, ssh: c9.ssh });
+            settings.on("project/python", sendSettings.bind(null, handler), plugin);
+            sendSettings(handler);
         }
         
-        function sendSettings(worker) {
-            worker.emit("set_python_config", { data: {
+        function sendSettings(handler) {
+            handler.emit("set_python_config", {
                 pythonVersion: settings.get("project/python/@version"),
                 pythonPath: settings.get("project/python/@path"),
-            }});
+            });
         }
         
         plugin.on("unload", function() {
