@@ -31,18 +31,18 @@ handler.handlesLanguage = function(language) {
 };
 
 handler.init = function(callback) {
-    var emitter = handler.sender;
+    var emitter = handler.getEmitter();
     emitter.on("set_python_config", function(e) {
-        pythonVersion = e.data.pythonVersion;
-        pythonPath = e.data.pythonPath;
+        pythonVersion = e.pythonVersion;
+        pythonPath = e.pythonPath;
         if (daemon) {
             daemon.kill();
             daemon = null;
         }
     });
     emitter.on("set_python_scripts", function(e) {
-        jediServer = e.data.jediServer;
-        launchCommand = e.data.launchCommand;
+        jediServer = e.jediServer;
+        launchCommand = e.launchCommand;
     });
     callback();
 };
@@ -54,7 +54,7 @@ handler.getCompletionRegex = function() {
 /**
  * Complete code at the current cursor position.
  */
-handler.complete = function(doc, fullAst, pos, currentNode, callback) {
+handler.complete = function(doc, fullAst, pos, options, callback) {
     callDaemon("completions", handler.path, doc, pos, function(err, results, meta) {
         if (err) return callback(err);
         
@@ -78,7 +78,7 @@ handler.complete = function(doc, fullAst, pos, currentNode, callback) {
 /**
  * Jump to the definition of what's under the cursor.
  */
-handler.jumpToDefinition = function(doc, fullAst, pos, currentNode, callback) {
+handler.jumpToDefinition = function(doc, fullAst, pos, options, callback) {
     callDaemon("goto_definitions", handler.path, doc, pos, callback);
 };
 
