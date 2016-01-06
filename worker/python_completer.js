@@ -75,6 +75,7 @@ handler.complete = function(doc, fullAst, pos, options, callback) {
             r.priority = r.name[0] === "_" || r.replaceText === r.replaceText.toUpperCase() ? 3 : 4;
             r.icon = r.icon || "property";
             r.icon = r.name[0] === "_" ? r.icon.replace(/2?$/, "2") : r.icon;
+            r.noDoc = options.noDoc;
             if (!r.doc)
                 return;
             var docLines = r.doc.split(/\r\n|\n|\r/);
