@@ -105,7 +105,7 @@ handler.predictNextCompletion = function(doc, fullAst, pos, options, callback) {
             && !m.replaceText.match(KEYWORD_REGEX);
     });
     var line = doc.getLine(pos.row);
-    if (predicted.length === 0 && "import".substr(0, line.length) === line)
+    if (predicted.length > 0 && "import".substr(0, line.length) === line)
         return callback(null, "import ");
     if (predicted.length !== 1)
         return callback();
