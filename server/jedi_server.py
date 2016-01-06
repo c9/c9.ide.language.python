@@ -46,7 +46,7 @@ class Daemon(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
         return # log silently
 
-def to_json(mode):
+def to_json(mode, nodoc):
     include_pos = mode == "goto_definitions"
     def to_json(c):
         try:
@@ -62,6 +62,7 @@ def to_json(mode):
             "path": "/" + c.module_path if c.module_path and include_pos else None,
             "doc": abbrev(c.docstring()) if c.type != "module" # module docs dont work
                                          and c.name[-2:] != "__" # skim on bandwidth
+                                         and not nodoc
                                          else None,
             "icon": {
                 "function": "method",
@@ -89,5 +90,6 @@ if __name__ == "__main__":
     parser.add_argument("--column", type=int, help="The column to read from")
     parser.add_argument("--path", help="The path of the script")
     parser.add_argument("--port", type=int, help="The port for the daemon to listen on")
+    parser.add_argument("--nodoc", help="Don't include docstrings in output")
     args = parser.parse_args()
     main(args)
