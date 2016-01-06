@@ -30,7 +30,7 @@ def run(source, args):
         result = getattr(script, args.get("mode"))()
     except:
         result = []
-    return json.dumps(result, default=to_json(args.get("mode")))
+    return json.dumps(result, default=to_json(args.get("mode"), args.get("nodoc")))
 
 class Daemon(BaseHTTPRequestHandler):
     def do_POST(self):
