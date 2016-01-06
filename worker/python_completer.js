@@ -106,7 +106,7 @@ handler.predictNextCompletion = function(doc, fullAst, pos, options, callback) {
     });
     var line = doc.getLine(pos.row);
     if (predicted.length === 0 && "import".substr(0, line.length) === line)
-        return callback("import ");
+        return callback(null, "import ");
     if (predicted.length !== 1)
         return callback();
     if (/^\s+import /.test(line))
