@@ -57,7 +57,7 @@ handler.analyze = function(docValue, fullAst, options, callback) {
     workerUtil.execAnalysis(
         "bash",
         {
-            mode: "tempfile",
+            mode: "local-tempfile",
             args: commands,
             maxCallInterval: 1200,
             env: {
