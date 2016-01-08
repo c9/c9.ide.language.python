@@ -24,7 +24,8 @@ var PYLINT_OPTIONS = [
     "-e", "W0612", // Unused variable
     "-e", "W0602", // Used global without assignment
     "-r", "n", 
-    "--msg-template={line}:{column}:\\ [{msg_id}]\\ {msg}"
+    "--msg-template={line}:{column}:\\ [{msg_id}]\\ {msg}",
+    "--load-plugins", "pylint_flask,pylint_django",
 ];
 
 handler.handlesLanguage = function(language) {

@@ -22,8 +22,7 @@ elif which virtualenv &>/dev/null; then
 
     if ! python -c 'import jedi' &>/dev/null; then
         echo "Installing python support dependencies"
-        pip install jedi >&2
-        pip install pylint >&2
+        pip install --upgrade jedi pylint pylint-flask pylint-django >&2
     fi
 
     PYTHON=$ENV/bin/$PYTHON
