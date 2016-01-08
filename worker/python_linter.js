@@ -63,7 +63,7 @@ handler.analyze = function(docValue, fullAst, options, callback) {
         {
             mode: "stdin",
             args: commands,
-            maxCallInterval: 1200,
+            maxCallInterval: 800,
             env: {
                 PYTHONPATH: pythonPath
             }

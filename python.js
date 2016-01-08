@@ -20,8 +20,10 @@ define(function(require, exports, module) {
         var settings = imports.settings;
         var c9 = imports.c9;
         var plugin = new Plugin("Ajax.org", main.consumes);
-        var jediServer = require("text!./server/jedi_server.py").replace(/ {4}/g, " ");
-        var launchCommand = require("text!./server/launch_command.sh").replace(/ +/g, " ");
+        var jediServer = require("text!./server/jedi_server.py")
+            .replace(/ {4}/g, " ").replace(/'/g, "'\\''");
+        var launchCommand = require("text!./server/launch_command.sh")
+            .replace(/ +/g, " ");
         
         var enabled = experimental.addExperiment("python_worker", false, "Language/Python Code Completion");
         

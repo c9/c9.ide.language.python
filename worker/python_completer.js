@@ -65,15 +65,17 @@ handler.getExpressionPrefixRegex = function() {
  * Complete code at the current cursor position.
  */
 handler.complete = function(doc, fullAst, pos, options, callback) {
-    callDaemon("completions", handler.path, doc, pos, function(err, results, meta) {
+    callDaemon("completions", handler.path, doc, pos, options, function(err, results, meta) {
         if (err) return callback(err);
         
         results && results.forEach(function beautifyCompletion(r) {
             r.isContextual = true;
             r.guessTooltip = true;
-            r.priority = r.name[0] === "_" ? 3 : 4;
+            r.replaceText = r.replaceText || r.name;
+            r.priority = r.name[0] === "_" || r.replaceText === r.replaceText.toUpperCase() ? 3 : 4;
             r.icon = r.icon || "property";
             r.icon = r.name[0] === "_" ? r.icon.replace(/2?$/, "2") : r.icon;
+            r.noDoc = options.noDoc;
             if (!r.doc)
                 return;
             var docLines = r.doc.split(/\r\n|\n|\r/);
@@ -89,7 +91,7 @@ handler.complete = function(doc, fullAst, pos, options, callback) {
  * Jump to the definition of what's under the cursor.
  */
 handler.jumpToDefinition = function(doc, fullAst, pos, options, callback) {
-    callDaemon("goto_definitions", handler.path, doc, pos, callback);
+    callDaemon("goto_definitions", handler.path, doc, pos, options, callback);
 };
 
 /**
@@ -104,8 +106,8 @@ handler.predictNextCompletion = function(doc, fullAst, pos, options, callback) {
             && !m.replaceText.match(KEYWORD_REGEX);
     });
     var line = doc.getLine(pos.row);
-    if (predicted.length === 0 && "import".substr(0, line.length) === line)
-        return callback("import ");
+    if (predicted.length > 0 && "import".substr(0, line.length) === line)
+        return callback(null, "import ");
     if (predicted.length !== 1)
         return callback();
     if (/^\s+import /.test(line))
@@ -121,7 +123,7 @@ handler.predictNextCompletion = function(doc, fullAst, pos, options, callback) {
  * Invoke a function on our jedi python daemon. It runs as an HTTP daemon
  * so we use curl to send a request.
  */
-function callDaemon(command, path, doc, pos, callback) {
+function callDaemon(command, path, doc, pos, options, callback) {
     var line = doc.getLine(pos.row);
     ensureDaemon(function(err, dontRetry) {
         if (err) return callback(err);
@@ -136,14 +138,15 @@ function callDaemon(command, path, doc, pos, callback) {
                     "-s", "--data-binary", "@-", // get input from stdin
                     "localhost:" + DAEMON_PORT + "?mode=" + command
                     + "&row=" + (pos.row + 1) + "&column=" + pos.column
-                    + "&path=" + path.replace(/^\//, ""),
+                    + "&path=" + path.replace(/^\//, "")
+                    + (options.noDoc ? "&nodoc=1" : ""),
                 ],
             },
             function onResult(err, stdout, stderr, meta) {
                 if (err) {
                     if (err.code === ERROR_NO_SERVER && !dontRetry) {
                         daemon = null;
-                        return callDaemon(command, path, doc, pos, callback);
+                        return callDaemon(command, path, doc, pos, options, callback);
                     }
                     return callback(err);
                 }
