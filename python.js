@@ -44,11 +44,13 @@ define(function(require, exports, module) {
                         "Pylint command-line options" : {
                             position: 320,
                             type: "textbox",
+                            width: 300,
                             path: "project/python/@pylintFlags",
                         },
                         "PYTHONPATH" : {
                             position: 330,
                             type: "textbox",
+                            width: 300,
                             path: "project/python/@path",
                         }
                     }
