@@ -33,7 +33,7 @@ define(function(require, exports, module) {
                     "Language Support" : {
                         position: 800,
                         "Python Version" : {
-                            position: 300,
+                            position: 310,
                             type: "dropdown",
                             path: "project/python/@version",
                             items: [
@@ -42,12 +42,12 @@ define(function(require, exports, module) {
                             ]
                         },
                         "Pylint command-line options" : {
-                            position: 310,
+                            position: 320,
                             type: "textbox",
                             path: "project/python/@pylintFlags",
                         },
                         "PYTHONPATH" : {
-                            position: 320,
+                            position: 330,
                             type: "textbox",
                             path: "project/python/@path",
                         }
