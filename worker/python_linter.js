@@ -12,6 +12,7 @@ var workerUtil = require("plugins/c9.ide.language/worker_util");
 var handler = module.exports = Object.create(baseHandler);
 var pythonVersion = "python2";
 var pythonPath = "";
+var pylintFlags = "";
 var launchCommand;
 var ssh;
 var PYLINT_OPTIONS = [
@@ -37,6 +38,7 @@ handler.init = function(callback) {
     emitter.on("set_python_config", function(e) {
         pythonVersion = e.pythonVersion;
         pythonPath = e.pythonPath;
+        pylintFlags = e.pylintFlags;
     });
     emitter.on("set_python_scripts", function(e) {
         launchCommand = e.launchCommand;
@@ -51,7 +53,8 @@ handler.analyze = function(docValue, fullAst, options, callback) {
     var commands = ssh
         ? ["-c", launchCommand, "--", pythonVersion, "$ENV/bin/pylint"]
         : ["-c", pythonVersion === "python2" ? "pylint2" : "pylint3"];
-    commands[commands.length - 1] += " " + PYLINT_OPTIONS.join(" ") + " $FILE";
+    commands[commands.length - 1] += " " + PYLINT_OPTIONS.join(" ")
+        + " " + pylintFlags + " $FILE";
 
     var hasStarImports = /from\s+[^\s]+\s+import\s+\*/.test(docValue);
     var markers = [];

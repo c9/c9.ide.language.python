@@ -41,11 +41,16 @@ define(function(require, exports, module) {
                                 { caption: "Python 3", value: "python3" },
                             ]
                         },
-                        "PYTHONPATH" : {
-                            position: 300,
+                        "Pylint command-line options" : {
+                            position: 310,
                             type: "textbox",
-                            path: "project/python/@path"
+                            path: "project/python/@pylintFlags",
                         },
+                        "PYTHONPATH" : {
+                            position: 320,
+                            type: "textbox",
+                            path: "project/python/@path",
+                        }
                     }
                 }
             }, plugin);
@@ -81,6 +86,7 @@ define(function(require, exports, module) {
             handler.emit("set_python_config", {
                 pythonVersion: settings.get("project/python/@version"),
                 pythonPath: settings.get("project/python/@path"),
+                pylintFlags: settings.get("project/python/@pylintFlags"),
             });
         }
         
