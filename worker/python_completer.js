@@ -155,7 +155,7 @@ function callDaemon(command, path, doc, pos, options, callback) {
                     return callback(new Error("Couldn't parse python-jedi output: " + stdout));
                 
                 console.log("[python_worker] " + command + " in " + (Date.now() - start)
-                    + "ms (jedi: " + meta.serverTime + "ms, transferred: " + meta.size + "b): "
+                    + "ms (jedi: " + meta.serverTime + "ms): "
                     + line.substr(0, pos.column));
 
                 callback(null, stdout, meta);
