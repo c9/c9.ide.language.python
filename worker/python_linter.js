@@ -97,6 +97,13 @@ function parseLine(line, hasStarImports) {
         level = "info";
         message += "?";
     }
+    // Downgrade unbalanced-tuple-unpacking upgraded to error in pylint 1.5,
+    // matching e.g. script, filename = argv
+    if (/E0632/.test(code))
+        level = "info";
+    // Downgrade other errors upgraded to error in pylint 1.5
+    if (/E1128|E0633/.test(code))
+        level = "warning";
         
     return {
         pos: {
