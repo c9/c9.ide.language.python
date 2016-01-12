@@ -52,7 +52,7 @@ handler.getIdentifierRegex = function() {
 };
 
 handler.getCompletionRegex = function() {
-    return (/(\.|\b(import|from|if|while|from|raise|return) )$/); 
+    return (/(\.|\b(import|from|if|while|from|raise|return) |% )$/); 
 };
 
 handler.getExpressionPrefixRegex = function() {
