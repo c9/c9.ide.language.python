@@ -112,7 +112,7 @@ handler.predictNextCompletion = function(doc, fullAst, pos, options, callback) {
         return callback();
     if (/^\s+import /.test(line))
         return callback();
-    console.log("[python_worker] Predicted our next completion will be for " + predicted[0].replaceText + ".");
+    console.log("[python_completer] Predicted our next completion will be for " + predicted[0].replaceText + ".");
     callback(null, {
         predicted: predicted[0].replaceText + ".",
         showEarly: predicted[0].replaceText === "self" || predicted[0].icon === "package"
@@ -154,7 +154,7 @@ function callDaemon(command, path, doc, pos, options, callback) {
                 if (typeof stdout !== "object")
                     return callback(new Error("Couldn't parse python-jedi output: " + stdout));
                 
-                console.log("[python_worker] " + command + " in " + (Date.now() - start)
+                console.log("[python_completer] " + command + " in " + (Date.now() - start)
                     + "ms (jedi: " + meta.serverTime + "ms): "
                     + line.substr(0, pos.column));
 
@@ -214,7 +214,7 @@ function ensureDaemon(callback) {
                 if (!code || /Daemon listening/.test(output)) // everything ok, try again later
                     daemon = null;
                 clearTimeout(killTimer);
-                done(code && new Error("[python_worker] Daemon failed: " + output));
+                done(code && new Error("[python_completer] Daemon failed: " + output));
             });
         }
     );
