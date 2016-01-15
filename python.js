@@ -6,7 +6,7 @@
 define(function(require, exports, module) {
     main.consumes = [
         "Plugin", "language", "jsonalyzer", "settings",
-        "preferences", "preferences.experimental", "c9"
+        "preferences", "c9"
     ];
     main.provides = ["language.python"];
     return main;
@@ -15,7 +15,6 @@ define(function(require, exports, module) {
         var Plugin = imports.Plugin;
         var language = imports.language;
         var jsonalyzer = imports["jsonalyzer"];
-        var experimental = imports["preferences.experimental"];
         var prefs = imports.preferences;
         var settings = imports.settings;
         var c9 = imports.c9;
@@ -23,9 +22,7 @@ define(function(require, exports, module) {
         var jediServer = require("text!./server/jedi_server.py")
             .replace(/ {4}/g, " ").replace(/'/g, "'\\''");
         var launchCommand = require("text!./server/launch_command.sh")
-            .replace(/ +/g, " ");
-        
-        var enabled = experimental.addExperiment("python_worker", false, "Language/Python Code Completion");
+            .replace(/ {2,}/g, " ");
         
         plugin.on("load", function() {
             jsonalyzer.registerWorkerHandler("plugins/c9.ide.language.python/worker/python_jsonalyzer");
@@ -70,9 +67,6 @@ define(function(require, exports, module) {
                 if (err) return console.error(err);
                 setupHandler(handler);
             });
-            
-            if (!enabled)
-                return;
             
             language.registerLanguageHandler("plugins/c9.ide.language.python/worker/python_completer", function(err, handler) {
                 if (err) return console.error(err);
