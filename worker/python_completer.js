@@ -52,13 +52,13 @@ handler.getIdentifierRegex = function() {
 };
 
 handler.getCompletionRegex = function() {
-    return (/(\.|\b(import|from|if|while|from|raise|return) )$/); 
+    return (/(\.|\b(import|from|if|while|from|raise|return) |% )$/); 
 };
 
 handler.getExpressionPrefixRegex = function() {
      // Match strings that can be an expression or its prefix, i.e.
      // keywords/identifiers followed by whitespace and/or operators
-    return /(\b\w+\s+|\b(if|while|for|print)\s*\(|([{[\-+*%<>!|&/]|==|!=)\s*)+/;
+    return /(\b\w+\s+|\b(if|while|for|print)\s*\(|([{[\-+*%<>!|&/,%]|==|!=)\s*)+/;
 };
 
 /**
