@@ -53,8 +53,8 @@ handler.analyze = function(docValue, fullAst, options, callback) {
     var commands = ssh
         ? ["-c", launchCommand, "--", pythonVersion, "$ENV/bin/pylint"]
         : ["-c", pythonVersion === "python2" ? "pylint2" : "pylint3"];
-    commands[commands.length - 1] += " " + PYLINT_OPTIONS.join(" ")
-        + " " + pylintFlags + " $FILE";
+    commands[commands.length - 1] += " " + (pylintFlags || PYLINT_OPTIONS.join(" "))
+        + " $FILE";
 
     var hasStarImports = /from\s+[^\s]+\s+import\s+\*/.test(docValue);
     var markers = [];
