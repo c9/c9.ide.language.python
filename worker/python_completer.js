@@ -55,7 +55,7 @@ handler.getCompletionRegex = function() {
     return (/(\.|\b(import|from|if|while|from|raise|return) |% )$/); 
 };
 
-handler.getExpressionPrefixRegex = function() {
+handler.getCacheCompletionRegex = function() {
      // Match strings that can be an expression or its prefix, i.e.
      // keywords/identifiers followed by whitespace and/or operators
     return /(\b\w+\s+|\b(if|while|for|print)\s*\(|([{[\-+*%<>!|&/,%]|==|!=)\s*)+/;
