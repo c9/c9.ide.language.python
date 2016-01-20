@@ -100,10 +100,11 @@ handler.jumpToDefinition = function(doc, fullAst, pos, options, callback) {
  * that the user may type 'math.' next and precompute completions.
  */
 handler.predictNextCompletion = function(doc, fullAst, pos, options, callback) {
+    var line = options.line;
     if (!options.matches.length) {
         // Normally we wouldn't complete here, maybe we can complete for the next char?
         // Let's do so unless it looks like the next char will be a newline
-        if (/(?![:)}\]])./.test(options.line[pos.column - 1]))
+        if (/(?![:)}\]])./.test(line[pos.column - 1]))
             return callback(null, { predicted: "" });
     }
     var predicted = options.matches.filter(function(m) {
@@ -111,7 +112,6 @@ handler.predictNextCompletion = function(doc, fullAst, pos, options, callback) {
             && m.icon !== "method"
             && !m.replaceText.match(KEYWORD_REGEX);
     });
-    var line = doc.getLine(pos.row);
     if (predicted.length > 0 && "import".substr(0, line.length) === line)
         return callback(null, "import ");
     if (predicted.length !== 1)
@@ -130,7 +130,6 @@ handler.predictNextCompletion = function(doc, fullAst, pos, options, callback) {
  * so we use curl to send a request.
  */
 function callDaemon(command, path, doc, pos, options, callback) {
-    var line = doc.getLine(pos.row);
     ensureDaemon(function(err, dontRetry) {
         if (err) return callback(err);
         
@@ -162,7 +161,7 @@ function callDaemon(command, path, doc, pos, options, callback) {
                 
                 console.log("[python_completer] " + command + " in " + (Date.now() - start)
                     + "ms (jedi: " + meta.serverTime + "ms): "
-                    + line.substr(0, pos.column));
+                    + options.line.substr(0, pos.column));
 
                 callback(null, stdout, meta);
             }
