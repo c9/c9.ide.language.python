@@ -47,6 +47,10 @@ handler.init = function(callback) {
     callback();
 };
 
+handler.onDocumentOpen = function(path, doc, oldPath, callback) {
+    ensureDaemon(callback);
+};
+
 handler.getIdentifierRegex = function() {
     return /\w/;
 };
