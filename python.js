@@ -44,6 +44,7 @@ define(function(require, exports, module) {
                             position: 320,
                             type: "textbox",
                             width: 300,
+                            message: "-d all -e E -e F",
                             path: "project/python/@pylintFlags",
                         },
                         "PYTHONPATH" : {
