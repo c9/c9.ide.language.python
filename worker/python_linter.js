@@ -15,7 +15,7 @@ var pythonPath = "";
 var pylintFlags = "";
 var launchCommand;
 var ssh;
-var PYLINT_OPTIONS = [
+var PYLINT_DEFAULTS = [
     "-d", "all",
     "-e", "E", 
     "-e", "F", 
@@ -24,6 +24,8 @@ var PYLINT_OPTIONS = [
     "-e", "W0199", // Assert called on a 2-tuple. Did you mean \'assert x,y\'?
     "-e", "W0612", // Unused variable
     "-e", "W0602", // Used global without assignment
+];
+var PYLINT_CONFIG = [
     "-r", "n", 
     "--msg-template={line}:{column}:\\ [{msg_id}]\\ {msg}",
     "--load-plugins", "pylint_flask,pylint_django",
@@ -53,7 +55,8 @@ handler.analyze = function(docValue, fullAst, options, callback) {
     var commands = ssh
         ? ["-c", launchCommand, "--", pythonVersion, "$ENV/bin/pylint"]
         : ["-c", pythonVersion === "python2" ? "pylint2" : "pylint3"];
-    commands[commands.length - 1] += " " + (pylintFlags || PYLINT_OPTIONS.join(" "))
+    commands[commands.length - 1] += " " + (pylintFlags || PYLINT_DEFAULTS.join(" "))
+        + " " + PYLINT_CONFIG.join(" ")
         + " $FILE";
 
     var hasStarImports = /from\s+[^\s]+\s+import\s+\*/.test(docValue);
@@ -69,7 +72,7 @@ handler.analyze = function(docValue, fullAst, options, callback) {
             }
         },
         function(err, stdout, stderr) {
-            if (err && err.code !== 2) return callback(err);
+            if (err && err.code !== 2 && err.code !== 3) return callback(err);
 
             stdout.split("\n").forEach(function(line) {
                 var marker = parseLine(line, hasStarImports);
