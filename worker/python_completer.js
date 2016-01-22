@@ -62,7 +62,7 @@ handler.getCompletionRegex = function() {
 handler.getCacheCompletionRegex = function() {
      // Match strings that can be an expression or its prefix, i.e.
      // keywords/identifiers followed by whitespace and/or operators
-    return /(\b\w+\s+|\b(if|while|for|print)\s*\(|([{[\-+*%<>!|&/,%]|==|!=)\s*)+/;
+    return / ?(\b\w+\s+|\b(if|while|for|print)\s*\(|([{[\-+*%<>!|&/,%]|==|!=)\s*)*/;
 };
 
 /**
@@ -82,6 +82,8 @@ handler.complete = function(doc, fullAst, pos, options, callback) {
             r.noDoc = options.noDoc;
             if (!r.doc)
                 return;
+            if (r.replaceText === "print(^^)" && pythonVersion === "python2" && !/\.[^ ]*$/.test(options.line.substr(pos.column)))
+                r.replaceText = "print";
             var docLines = r.doc.split(/\r\n|\n|\r/);
             var docBody = docLines.slice(2).join("\n");
             r.docHeadHtml = workerUtil.filterDocumentation(docLines[0]).replace(/^([A-Za-z0-9$_]+\()self, /, "$1");
@@ -104,12 +106,18 @@ handler.jumpToDefinition = function(doc, fullAst, pos, options, callback) {
  * that the user may type 'math.' next and precompute completions.
  */
 handler.predictNextCompletion = function(doc, fullAst, pos, options, callback) {
+    var line = options.line;
+    if (!options.matches.length) {
+        // Normally we wouldn't complete here, maybe we can complete for the next char?
+        // Let's do so unless it looks like the next char will be a newline
+        if (line[pos.column - 1] && /(?![:)}\]\s"'])./.test(line[pos.column - 1]))
+            return callback(null, { predicted: "" });
+    }
     var predicted = options.matches.filter(function(m) {
         return m.isContextual
             && m.icon !== "method"
             && !m.replaceText.match(KEYWORD_REGEX);
     });
-    var line = doc.getLine(pos.row);
     if (predicted.length > 0 && "import".substr(0, line.length) === line)
         return callback(null, "import ");
     if (predicted.length !== 1)
@@ -128,7 +136,6 @@ handler.predictNextCompletion = function(doc, fullAst, pos, options, callback) {
  * so we use curl to send a request.
  */
 function callDaemon(command, path, doc, pos, options, callback) {
-    var line = doc.getLine(pos.row);
     ensureDaemon(function(err, dontRetry) {
         if (err) return callback(err);
         
@@ -160,7 +167,7 @@ function callDaemon(command, path, doc, pos, options, callback) {
                 
                 console.log("[python_completer] " + command + " in " + (Date.now() - start)
                     + "ms (jedi: " + meta.serverTime + "ms): "
-                    + line.substr(0, pos.column));
+                    + options.line.substr(0, pos.column));
 
                 callback(null, stdout, meta);
             }
