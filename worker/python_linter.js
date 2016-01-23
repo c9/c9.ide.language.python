@@ -56,15 +56,18 @@ handler.analyze = function(docValue, fullAst, options, callback) {
         ? ["-c", launchCommand, "--", pythonVersion, "$ENV/bin/pylint"]
         : ["-c", pythonVersion === "python2" ? "pylint2" : "pylint3"];
     commands[commands.length - 1] += " " + (pylintFlags || PYLINT_DEFAULTS.join(" "))
-        + " " + PYLINT_CONFIG.join(" ")
-        + " $FILE";
+        + " " + PYLINT_CONFIG.join(" ");
 
-    var hasStarImports = /from\s+[^\s]+\s+import\s+\*/.test(docValue);
+    var hasStarImports = /\bfrom\s+[^\s]+\s+import\s+\*/.test(docValue);
+    var hasRelativeImports = /\bfrom\s+\.|import\s+\./.test(docValue);
+    if (hasRelativeImports) // need to use a temp file :(
+        commands[commands.length - 1] += " $FILE";
+
     var markers = [];
     workerUtil.execAnalysis(
         "bash",
         {
-            mode: "local-tempfile",
+            mode: hasRelativeImports ? "local-tempfile" : "stdin",
             args: commands,
             maxCallInterval: 800,
             env: {
