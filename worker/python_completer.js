@@ -167,7 +167,7 @@ function callDaemon(command, path, doc, pos, options, callback) {
                 
                 console.log("[python_completer] " + command + " in " + (Date.now() - start)
                     + "ms (jedi: " + meta.serverTime + "ms): "
-                    + options.line.substr(0, pos.column));
+                    + doc.getLine(pos.row).substr(0, pos.column));
 
                 callback(null, stdout, meta);
             }
