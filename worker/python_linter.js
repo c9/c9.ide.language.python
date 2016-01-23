@@ -75,7 +75,7 @@ handler.analyze = function(docValue, fullAst, options, callback) {
             }
         },
         function(err, stdout, stderr) {
-            if (err && err.code !== 2 && err.code !== 3) return callback(err);
+            if (err && !stdout) return callback(err);
 
             stdout.split("\n").forEach(function(line) {
                 var marker = parseLine(line, hasStarImports);
