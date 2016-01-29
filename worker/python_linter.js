@@ -107,6 +107,9 @@ function parseLine(line, hasStarImports) {
     // Downgrade other errors upgraded to error in pylint 1.5
     if (/E1128|E0633/.test(code))
         level = "warning";
+    // Ignore import errors, as relative imports and temp files don't play together
+    if (/E0401/.test(code))
+        return;
         
     return {
         pos: {
