@@ -27,7 +27,8 @@ elif which virtualenv &>/dev/null; then
 
     PYTHON=$ENV/bin/$PYTHON
 else
-    echo 'Python support fatal error: virtualenv not installed'
+    echo "Python support fatal error: virtualenv not installed"
+    echo "try 'pip install virtualenv' or 'sudo pip install virtualenv'"
     exit 1
 fi
 
