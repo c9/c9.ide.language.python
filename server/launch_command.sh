@@ -15,7 +15,11 @@ if [[ -d $SHAREDENV ]]; then
 elif which virtualenv &>/dev/null; then
     ENV=$FALLBACKENV
     if ! [[ -d $ENV ]]; then
-        virtualenv --python=$PYTHON $ENV
+        VERSION=
+        if [ "$PYTHON" = "python3" ]; then
+            VERSION=--python=python3
+        fi
+        virtualenv $VERSION $ENV
     fi
 
     source $ENV/bin/activate
