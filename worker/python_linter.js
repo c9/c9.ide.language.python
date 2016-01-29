@@ -14,7 +14,7 @@ var pythonVersion = "python2";
 var pythonPath = "";
 var pylintFlags = "";
 var launchCommand;
-var ssh;
+var hosted;
 var PYLINT_DEFAULTS = [
     "-d", "all",
     "-e", "E", 
@@ -44,7 +44,7 @@ handler.init = function(callback) {
     });
     emitter.on("set_python_scripts", function(e) {
         launchCommand = e.launchCommand;
-        ssh = e.ssh;
+        hosted = e.hosted;
     });
     callback();
 };
@@ -52,9 +52,9 @@ handler.init = function(callback) {
 handler.analyze = function(docValue, fullAst, options, callback) {
     // Get a copy of pylint. For ssh workspaces we need to use a helper script;
     // in other cases we have the "pylint2" and "pylint3" commands.
-    var commands = ssh
-        ? ["-c", launchCommand, "--", pythonVersion, "$ENV/bin/pylint"]
-        : ["-c", pythonVersion === "python2" ? "pylint2" : "pylint3"];
+    var commands = hosted
+        ? ["-c", pythonVersion === "python2" ? "pylint2" : "pylint3"]
+        : ["-c", launchCommand, "--", pythonVersion, "$ENV/bin/pylint"];
     commands[commands.length - 1] += " " + (pylintFlags || PYLINT_DEFAULTS.join(" "))
         + " " + PYLINT_CONFIG.join(" ")
         + " $FILE";

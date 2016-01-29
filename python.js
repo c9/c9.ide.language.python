@@ -76,7 +76,11 @@ define(function(require, exports, module) {
         });
             
         function setupHandler(handler) {
-            handler.emit("set_python_scripts", { jediServer: jediServer, launchCommand: launchCommand, ssh: c9.ssh });
+            handler.emit("set_python_scripts", {
+                jediServer: jediServer,
+                launchCommand: launchCommand,
+                hosted: !options.testing && c9.hosted
+            });
             settings.on("project/python", sendSettings.bind(null, handler), plugin);
             sendSettings(handler);
         }
