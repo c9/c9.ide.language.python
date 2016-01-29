@@ -236,6 +236,7 @@ function ensureDaemon(callback) {
             showedJediError = true;
         }
         callback && callback(err);
+        handler.sender.emit("python_completer_ready");
         callback = null;
     }
 }

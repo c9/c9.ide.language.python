@@ -58,6 +58,8 @@ handler.analyze = function(docValue, fullAst, options, callback) {
     commands[commands.length - 1] += " " + (pylintFlags || PYLINT_DEFAULTS.join(" "))
         + " " + PYLINT_CONFIG.join(" ")
         + " $FILE";
+    if (!launchCommand)
+        return callback(new Error("Not initialized yet"));
 
     var hasStarImports = /from\s+[^\s]+\s+import\s+\*/.test(docValue);
     var markers = [];
