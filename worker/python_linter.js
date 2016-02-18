@@ -57,7 +57,7 @@ handler.analyze = function(docValue, fullAst, options, callback) {
         : ["-c", launchCommand, "--", pythonVersion, "$ENV/bin/pylint"];
     commands[commands.length - 1] += " " + (pylintFlags || PYLINT_DEFAULTS.join(" "))
         + " " + PYLINT_CONFIG.join(" ")
-        + " $FILE";
+        + " '$FILE'";
     if (!launchCommand)
         return callback(new Error("Warning: python_linter not initialized yet"));
 
