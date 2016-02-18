@@ -59,7 +59,7 @@ handler.analyze = function(docValue, fullAst, options, callback) {
         + " " + PYLINT_CONFIG.join(" ")
         + " $FILE";
     if (!launchCommand)
-        return callback(new Error("Not initialized yet"));
+        return callback(new Error("Warning: python_linter not initialized yet"));
 
     var hasStarImports = /from\s+[^\s]+\s+import\s+\*/.test(docValue);
     var markers = [];
