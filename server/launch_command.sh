@@ -25,14 +25,14 @@ elif which virtualenv &>/dev/null; then
     source $ENV/bin/activate
 
     if ! python -c 'import jedi' &>/dev/null; then
-        echo "Installing python support dependencies"
+        echo "Installing python support dependencies" >&2
         pip install --upgrade jedi pylint pylint-flask pylint-django >&2
     fi
 
     PYTHON=$ENV/bin/$PYTHON
 else
-    echo "Python support fatal error: virtualenv not installed"
-    echo "try 'pip install virtualenv' or 'sudo pip install virtualenv'"
+    echo "Python support fatal error: virtualenv not installed" >&2
+    echo "try 'pip install virtualenv' or 'sudo pip install virtualenv'" >&2
     exit 1
 fi
 
