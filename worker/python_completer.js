@@ -159,7 +159,7 @@ function callDaemon(command, path, doc, pos, options, callback) {
                         daemon = null;
                         return callDaemon(command, path, doc, pos, options, callback);
                     }
-                    return callback(err);
+                    return callback(new Error("jedi_server failed or not responding"));
                 }
                 
                 if (typeof stdout !== "object")
@@ -225,17 +225,17 @@ function ensureDaemon(callback) {
                 if (!code || /Daemon listening/.test(output)) // everything ok, try again later
                     daemon = null;
                 clearTimeout(killTimer);
-                done(code && new Error("[python_completer] Daemon failed: " + output));
+                done(code && new Error("[python_completer] Daemon failed: " + output), true);
             });
         }
     );
     
-    function done(err) {
+    function done(err, dontRetry) {
         if (err && /No module named jedi/.test(err.message) && !showedJediError) {
             workerUtil.showError("Jedi not found. Please run 'pip install jedi' or 'sudo pip install jedi' to enable Python code completion.");
             showedJediError = true;
         }
-        callback && callback(err);
+        callback && callback(err, dontRetry);
         handler.sender.emit("python_completer_ready");
         callback = null;
     }
