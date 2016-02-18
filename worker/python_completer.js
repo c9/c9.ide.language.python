@@ -211,8 +211,8 @@ function ensureDaemon(callback) {
             if (daemon.killed)
                 daemon.kill();
             
-            // We (re)start the daemon after 10 minutes to conserve memory
-            var killTimer = setTimeout(daemon.kill.bind(daemon), 10 * 60 * 1000);
+            // We (re)start the daemon after 30 minutes to conserve memory
+            var killTimer = setTimeout(daemon.kill.bind(daemon), 30 * 60 * 1000);
             
             child.stderr.on("data", function(data) {
                 output += data;
