@@ -115,12 +115,11 @@ handler.predictNextCompletion = function(doc, fullAst, pos, options, callback) {
     }
     var predicted = options.matches.filter(function(m) {
         return m.isContextual
-            && m.icon !== "method"
             && !m.replaceText.match(KEYWORD_REGEX);
     });
     if (predicted.length > 0 && "import".substr(0, line.length) === line)
         return callback(null, "import ");
-    if (predicted.length !== 1)
+    if (predicted.length !== 1 || predicted[0].icon === "method")
         return callback();
     if (/^\s+import /.test(line))
         return callback();
