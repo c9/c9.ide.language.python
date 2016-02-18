@@ -48,6 +48,7 @@ handler.init = function(callback) {
 };
 
 handler.onDocumentOpen = function(path, doc, oldPath, callback) {
+    if (!launchCommand) return callback();
     ensureDaemon(callback);
 };
 
