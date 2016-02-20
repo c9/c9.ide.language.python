@@ -147,6 +147,7 @@ function callDaemon(command, path, doc, pos, options, callback) {
                 json: true,
                 args: [
                     "-s", "--data-binary", "@-", // get input from stdin
+                    "-H", "Expect:", // don't wait for "100-Continue"
                     "localhost:" + DAEMON_PORT + "?mode=" + command
                     + "&row=" + (pos.row + 1) + "&column=" + pos.column
                     + "&path=" + encodeURIComponent(path.replace(/^\//, ""))
