@@ -156,10 +156,8 @@ function callDaemon(command, path, doc, pos, options, callback) {
             },
             function onResult(err, stdout, stderr, meta) {
                 if (err) {
-                    if (err.code === ERROR_NO_SERVER && !dontRetry) {
-                        daemon = null;
+                    if (err.code === ERROR_NO_SERVER && !dontRetry)
                         return callDaemon(command, path, doc, pos, options, callback);
-                    }
                     return callback(new Error("jedi_server failed or not responding"));
                 }
                 
@@ -182,7 +180,7 @@ function callDaemon(command, path, doc, pos, options, callback) {
  */
 function ensureDaemon(callback) {
     if (daemon)
-        return done(daemon.err);
+        return done(daemon.err, true);
 
     daemon = {
         err: new Error("Still starting daemon, enhance your calm"),
