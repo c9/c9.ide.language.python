@@ -21,7 +21,7 @@ def main(args):
     except:
         sys.stderr.write("Daemon unable to listen at :%s\n" % args.port)
         sys.exit(98)
-    sys.stderr.write("Daemon " + "listening at :%s\n" % args.port)
+    sys.stderr.write("Daemon " + "listening at :%s\n" % args.port) # concat strings to avoid matching this string in the client
     server.serve_forever()
 
 def run(source, args):
