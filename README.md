@@ -9,8 +9,8 @@ for an overview of the APIs and techniques used in this plugin.
 
 # Using This Plugin
 
-This plugin is still marked "experimental". To use it in Cloud9,
-please go to Cloud9 > Preferences > Experimental > Python Code Completion.
+This plugin is available by default. You can set whether your project is using Python2 or Python3 by going to
+Cloud9 > Preferences > Project Settings > Language Support > Python Version.
 
 ## License
 
