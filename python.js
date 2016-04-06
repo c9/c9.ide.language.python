@@ -31,6 +31,11 @@ define(function(require, exports, module) {
                 "Project": {
                     "Language Support" : {
                         position: 800,
+                        "Python": {
+                            position: 300,
+                            type: "label",
+                            caption: "Python:",
+                        },
                         "Enable Python code completion": {
                             position: 310,
                             type: "checkbox",
