@@ -31,8 +31,18 @@ define(function(require, exports, module) {
                 "Project": {
                     "Language Support" : {
                         position: 800,
-                        "Python Version" : {
+                        "Python": {
+                            position: 300,
+                            type: "label",
+                            caption: "Python:",
+                        },
+                        "Enable Python code completion": {
                             position: 310,
+                            type: "checkbox",
+                            path: "project/python/@completion",
+                        },
+                        "Python Version": {
+                            position: 320,
                             type: "dropdown",
                             path: "project/python/@version",
                             items: [
@@ -40,15 +50,15 @@ define(function(require, exports, module) {
                                 { caption: "Python 3", value: "python3" },
                             ]
                         },
-                        "Pylint command-line options" : {
-                            position: 320,
+                        "Pylint command-line options": {
+                            position: 330,
                             type: "textbox",
                             width: 300,
                             message: "-d all -e E -e F",
                             path: "project/python/@pylintFlags",
                         },
-                        "PYTHONPATH" : {
-                            position: 330,
+                        "PYTHONPATH": {
+                            position: 340,
                             type: "textbox",
                             width: 300,
                             path: "project/python/@path",
@@ -60,6 +70,7 @@ define(function(require, exports, module) {
             settings.on("read", function(e) {
                 settings.setDefaults("project/python", [
                     ["version", "python2"],
+                    ["completion", true],
                     ["path", options.pythonPath || "/usr/local/lib/python2.7/dist-packages:/usr/local/lib/python3.4/dist-packages"]
                 ]);
             }, plugin);
@@ -90,6 +101,7 @@ define(function(require, exports, module) {
                 pythonVersion: settings.get("project/python/@version"),
                 pythonPath: settings.get("project/python/@path"),
                 pylintFlags: settings.get("project/python/@pylintFlags"),
+                completion: settings.get("project/python/@completion"),
             });
         }
         

@@ -20,6 +20,7 @@ var ERROR_NO_SERVER = 7;
 
 var handler = module.exports = Object.create(baseHandler);
 var pythonVersion = "python2";
+var enabled;
 var pythonPath = "";
 var jediServer;
 var launchCommand;
@@ -35,6 +36,7 @@ handler.init = function(callback) {
     emitter.on("set_python_config", function(e) {
         pythonVersion = e.pythonVersion;
         pythonPath = e.pythonPath;
+        enabled = e.completion;
         if (daemon) {
             daemon.kill();
             daemon = null;
@@ -45,11 +47,6 @@ handler.init = function(callback) {
         launchCommand = e.launchCommand;
     });
     callback();
-};
-
-handler.onDocumentOpen = function(path, doc, oldPath, callback) {
-    if (!launchCommand) return callback();
-    ensureDaemon(callback);
 };
 
 handler.getIdentifierRegex = function() {
@@ -66,10 +63,17 @@ handler.getCacheCompletionRegex = function() {
     return / ?(\b\w+\s+|\b(if|while|for|print)\s*\(|([{[\-+*%<>!|&/,%]|==|!=)\s*)*/;
 };
 
+handler.onDocumentOpen = function(path, doc, oldPath, callback) {
+    if (!enabled) return callback();
+    ensureDaemon(callback);
+};
+
 /**
  * Complete code at the current cursor position.
  */
 handler.complete = function(doc, fullAst, pos, options, callback) {
+    if (!enabled) return callback();
+    
     callDaemon("completions", handler.path, doc, pos, options, function(err, results, meta) {
         if (err) return callback(err);
         
@@ -98,6 +102,8 @@ handler.complete = function(doc, fullAst, pos, options, callback) {
  * Jump to the definition of what's under the cursor.
  */
 handler.jumpToDefinition = function(doc, fullAst, pos, options, callback) {
+    if (!enabled) return callback();
+    
     callDaemon("goto_definitions", handler.path, doc, pos, options, callback);
 };
 
