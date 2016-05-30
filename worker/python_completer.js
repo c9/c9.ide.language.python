@@ -125,7 +125,7 @@ handler.predictNextCompletion = function(doc, fullAst, pos, options, callback) {
             && !m.replaceText.match(KEYWORD_REGEX);
     });
     if (predicted.length > 0 && "import".substr(0, line.length) === line)
-        return callback(null, "import ");
+        return callback(null, { predicted: "import " });
     if (predicted.length !== 1 || predicted[0].icon === "method")
         return callback();
     if (/^\s+import /.test(line))
