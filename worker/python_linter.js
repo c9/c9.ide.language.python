@@ -70,7 +70,8 @@ handler.analyze = function(docValue, fullAst, options, callback) {
             args: commands,
             maxCallInterval: 800,
             env: {
-                PYTHONPATH: pythonPath
+                PYTHONPATH: pythonPath,
+                PYLINTHOME: "/tmp/.pylint.d",
             }
         },
         function(err, stdout, stderr) {
