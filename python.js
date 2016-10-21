@@ -62,6 +62,16 @@ define(function(require, exports, module) {
                             type: "textbox",
                             width: 300,
                             path: "project/python/@path",
+                        },
+                        "Format Code on Save": {
+                            position: 350,
+                            type: "checkbox",
+                            path: "project/format/@python_enabled",
+                        },
+                        "Custom Code Formatter": {
+                            position: 360,
+                            type: "textbox",
+                            path: "project/format/@python_formatter",
                         }
                     }
                 }
