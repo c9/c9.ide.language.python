@@ -113,6 +113,8 @@ function parseLine(line, hasStarImports) {
     // Ignore import errors, as relative imports and temp files don't play together
     if (/E0401/.test(code))
         return;
+    if (/Django is not available on/.test(message))
+        return;
         
     return {
         pos: {
