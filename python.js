@@ -29,13 +29,8 @@ define(function(require, exports, module) {
             
             prefs.add({
                 "Project": {
-                    "Language Support" : {
-                        position: 800,
-                        "Python": {
-                            position: 300,
-                            type: "label",
-                            caption: "Python:",
-                        },
+                    "Python Support" : {
+                        position: 1300,
                         "Enable Python code completion": {
                             position: 310,
                             type: "checkbox",
@@ -66,12 +61,12 @@ define(function(require, exports, module) {
                         "Format Code on Save": {
                             position: 350,
                             type: "checkbox",
-                            path: "project/format/@python_enabled",
+                            path: "project/python/@formatOnSave",
                         },
                         "Custom Code Formatter": {
                             position: 360,
                             type: "textbox",
-                            path: "project/format/@python_formatter",
+                            path: "project/format/@formatter",
                         }
                     }
                 }

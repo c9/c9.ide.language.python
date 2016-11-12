@@ -10,7 +10,7 @@ for an overview of the APIs and techniques used in this plugin.
 # Using This Plugin
 
 This plugin is available by default. You can set whether your project is using Python2 or Python3 by going to
-Cloud9 > Preferences > Project Settings > Language Support > Python Version.
+Cloud9 > Preferences > Project Settings > Python Support > Python Version.
 
 ## License
 
