@@ -37,12 +37,13 @@ class Daemon(BaseHTTPRequestHandler):
         query = urlparse.urlparse(self.path).query
         args = urlparse.parse_qsl(query)
 
-        length = int(self.headers.getheader("content-length", 0))
+        length = int(self.headers.get("content-length", 0))
         source = self.rfile.read(length)
 
         self.send_response(200)
         self.end_headers()
-        self.wfile.write(run(source, dict(args)))
+        self.wfile.write(run(source, dict(args)).encode("utf8"))
+
     def log_message(self, format, *args):
         return # log silently
 
@@ -73,7 +74,9 @@ def to_json(mode, nodoc):
     return to_json
 
 def remove_nulls(d):
-    for key, value in d.items():
+    # iterate over list copy to avoid size change in Python 3
+    # http://stackoverflow.com/a/11941855/1797347
+    for key, value in list(d.items()):
         if value is None:
             del d[key]
         elif isinstance(value, dict):
