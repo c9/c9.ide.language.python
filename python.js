@@ -29,7 +29,7 @@ define(function(require, exports, module) {
             
             prefs.add({
                 "Project": {
-                    "Python Support" : {
+                    "Python Support": {
                         position: 1300,
                         "Enable Python code completion": {
                             position: 310,
